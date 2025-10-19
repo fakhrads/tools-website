@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { NavBar } from '@/components/nav-bar'
 
 export const metadata: Metadata = {
-  title: 'Web Tools Studio',
+  title: 'DevTools Studio',
   description: 'Lightning-fast tools for developers',
 }
 
