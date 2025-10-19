@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 import { NavBar } from '@/components/nav-bar'
 
 export const metadata: Metadata = {
-  title: 'DevTools Studio',
+  title: 'Web Tools Studio',
   description: 'Lightning-fast tools for developers',
 }
 
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </main>
         <footer className="border-t">
           <div className="container mx-auto px-4 py-6 text-xs text-slate-500">
-            Made with ❤️ · Next.js App Router · Tailwind + shadcn/ui
+            Made with ❤️ by fakhrads · Next.js · Tailwind + shadcn/ui
           </div>
         </footer>
       </body>

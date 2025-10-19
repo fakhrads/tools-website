@@ -31,9 +31,7 @@ const SECONDARY_LINKS: ReadonlyArray<TopLink> = [
   { href: '/tools', label: 'Tools', badge: 'New' },
   { href: '/docs', label: 'Docs' },
   { href: '/changelog', label: 'Changelog' },
-  { href: '/pricing', label: 'Pricing' },
-  { href: '/about', label: 'About' },
-  { href: 'https://github.com/your-org/devtools-studio', label: 'GitHub', external: true },
+  { href: '/about', label: 'About', external: false }
 ]
 
 /** ==============================
@@ -97,7 +95,7 @@ export function NavBar() {
 
             <Button asChild variant="ghost" size="icon" className="hover:bg-slate-100">
               <a
-                href="https://github.com/your-org/devtools-studio"
+                href="https://github.com/fakhrads/tools-website"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Open GitHub"
@@ -260,7 +258,7 @@ function MobileSheet({
               <Hammer className="h-4 w-4" />
             </span>
             <div className="text-left">
-              <div className="font-bold">DevTools Studio</div>
+              <div className="font-bold">Web Tools Studio</div>
               <div className="text-xs font-normal text-slate-500">Developer Tools</div>
             </div>
           </SheetTitle>
