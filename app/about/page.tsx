@@ -67,13 +67,7 @@ export default function AboutPage() {
         </CardHeader>
         <CardContent className="text-slate-700 text-sm leading-relaxed space-y-3">
           <p>
-            Dibuat dan dikelola oleh <strong>Fakhri Adi Saputra</strong> — seorang software engineer
-            di PT Astra Honda Motor, sekaligus founder dari{' '}
-            <span className="font-semibold text-blue-600">Raznar Digital Nusantara</span>.
-          </p>
-          <p>
-            Tujuan pengembangan aplikasi ini adalah untuk menyediakan tools open-access
-            bagi developer Indonesia agar dapat bekerja lebih efisien dan produktif.
+            Dibuat dan dikelola oleh <strong>Fakhri Adi Saputra</strong>
           </p>
         </CardContent>
       </Card>
