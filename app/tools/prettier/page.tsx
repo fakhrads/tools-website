@@ -117,17 +117,17 @@ function CarbonPreview({
 /* =================================== Page =================================== */
 export default function PrettierPage() {
   return (
-    <Card className="border border-slate-200/80 rounded-2xl shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Wand2 className="h-4 w-4" />
-          <CardTitle className="text-base font-semibold">Prettier Formatter</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <PrettierFormatter />
-      </CardContent>
-    </Card>
+    <section className="grid gap-6">
+      <div className="flex items-center gap-2">
+        <Wand2 className="h-5 w-5" />
+        <h1 className="text-xl font-semibold">Code Formatter</h1>
+      </div>
+      <Card className="border border-slate-200/80 rounded-2xl shadow-sm">
+        <CardContent>
+          <PrettierFormatter />
+        </CardContent>
+      </Card>
+    </section>
   )
 }
 

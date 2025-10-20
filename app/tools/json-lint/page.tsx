@@ -111,17 +111,17 @@ function JsonNode({ name, value }: { name?: string; value: any }) {
 
 export default function JsonLintPage() {
   return (
-    <Card className="border border-slate-200/80 rounded-2xl shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileJson className="h-4 w-4" />
-          <CardTitle className="text-base font-semibold">JSON Lint</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <JsonLintTool />
-      </CardContent>
-    </Card>
+    <section className="grid gap-6">
+      <div className="flex items-center gap-2">
+        <FileJson className="h-5 w-5" />
+        <h1 className="text-xl font-semibold">JSON Lint</h1>
+      </div>
+      <Card className="border border-slate-200/80 rounded-2xl shadow-sm">
+        <CardContent>
+          <JsonLintTool />
+        </CardContent>
+      </Card>
+    </section>
   )
 }
 
@@ -193,6 +193,7 @@ function JsonLintTool() {
 
   return (
     <div className="grid gap-4">
+      
       {/* ===== Top toolbar ===== */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">

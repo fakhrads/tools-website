@@ -1,0 +1,208 @@
+'use client'
+
+import * as React from 'react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Copy, Regex, Sparkles } from 'lucide-react'
+
+type MatchInfo = {
+  index: number
+  match: string
+  groups: (string | undefined)[]
+}
+
+function safeRegExp(pattern: string, flags: string): RegExp | null {
+  try {
+    return new RegExp(pattern, flags)
+  } catch {
+    return null
+  }
+}
+
+function highlightMatches(text: string, re: RegExp | null) {
+  if (!re) return <>{text}</>
+  // clone flags with global to iterate
+  const flags = re.flags.includes('g') ? re.flags : re.flags + 'g'
+  const globalRe = new RegExp(re.source, flags)
+
+  const chunks: React.ReactNode[] = []
+  let lastIndex = 0
+  let m: RegExpExecArray | null
+
+  while ((m = globalRe.exec(text)) !== null) {
+    const start = m.index
+    const end = start + m[0].length
+    if (start > lastIndex) chunks.push(<span key={`t-${lastIndex}`}>{text.slice(lastIndex, start)}</span>)
+    chunks.push(
+      <mark key={`m-${start}-${end}`} className="rounded bg-yellow-200 px-1 py-0.5">
+        {m[0]}
+      </mark>
+    )
+    lastIndex = end
+    // avoid zero-length infinite loops
+    if (m[0].length === 0) globalRe.lastIndex++
+  }
+  if (lastIndex < text.length) chunks.push(<span key={`t-end`}>{text.slice(lastIndex)}</span>)
+  return <>{chunks}</>
+}
+
+function collectMatches(text: string, re: RegExp | null): MatchInfo[] {
+  if (!re) return []
+  const flags = re.flags.includes('g') ? re.flags : re.flags + 'g'
+  const globalRe = new RegExp(re.source, flags)
+  const out: MatchInfo[] = []
+  let m: RegExpExecArray | null
+  while ((m = globalRe.exec(text)) !== null) {
+    out.push({
+      index: m.index,
+      match: m[0],
+      groups: Array.from(m).slice(1),
+    })
+    if (m[0].length === 0) globalRe.lastIndex++
+  }
+  return out
+}
+
+// Sangat ringkas, level "heuristic" untuk MVP
+function explainRegex(pattern: string): string[] {
+  const notes: string[] = []
+  if (pattern.length === 0) return notes
+
+  // Anchors
+  if (/^\^/.test(pattern)) notes.push('^ : anchor ke awal string/baris')
+  if (/\$$/.test(pattern)) notes.push('$ : anchor ke akhir string/baris')
+
+  // Common tokens
+  const tokenMap: Array<[RegExp, string]> = [
+    [/(\\d)/g, '\\d : digit (0-9)'],
+    [/(\\D)/g, '\\D : bukan digit'],
+    [/(\\w)/g, '\\w : word-char (huruf, angka, underscore)'],
+    [/(\\W)/g, '\\W : bukan word-char'],
+    [/(\\s)/g, '\\s : spasi/whitespace'],
+    [/(\\S)/g, '\\S : bukan whitespace'],
+    [/(\.)/g, '. : karakter apa pun (kecuali newline, tergantung flag s)'],
+    [/(\\b)/g, '\\b : word boundary'],
+    [/(\\B)/g, '\\B : non-word boundary'],
+  ]
+  tokenMap.forEach(([re, desc]) => {
+    if (re.test(pattern)) notes.push(desc)
+  })
+
+  // Character class & ranges
+  if (/\[.*?\]/.test(pattern)) notes.push('[...] : character class (pilihan karakter)')
+  if (/\[[^\]]*?-.*?\]/.test(pattern)) notes.push('a-z / A-Z / 0-9 : range karakter dalam class')
+
+  // Quantifiers
+  if (/\*/.test(pattern)) notes.push('* : 0 atau lebih')
+  if (/\+/.test(pattern)) notes.push('+ : 1 atau lebih')
+  if (/\?/.test(pattern)) notes.push('? : 0 atau 1 (atau non-greedy jika setelah quantifier)')
+  if (/\{\d+(,\d*)?\}/.test(pattern)) notes.push('{m,n} : pengulangan dengan batas tertentu')
+
+  // Groups
+  if (/\((?!\?:)/.test(pattern)) notes.push('(...) : capturing group')
+  if (/\(\?:/.test(pattern)) notes.push('(?:...) : non-capturing group')
+  if (/\(\?=/.test(pattern)) notes.push('(?=...) : positive lookahead')
+  if (/\(\?!/.test(pattern)) notes.push('(?!) : negative lookahead')
+  if (/\(\?<=/.test(pattern)) notes.push('(?<=...) : positive lookbehind (dukungan engine tergantung)')
+  if (/\(\?<!/.test(pattern)) notes.push('(?<!...) : negative lookbehind (dukungan engine tergantung)')
+
+  return Array.from(new Set(notes))
+}
+
+export default function RegexTesterPage() {
+  const [pattern, setPattern] = React.useState<string>('^([A-Za-z]+)\\s(\\d+)$')
+  const [flags, setFlags] = React.useState<string>('gm')
+  const [text, setText] = React.useState<string>('Hello 123\nWorld 456')
+  const re = safeRegExp(pattern, flags)
+  const matches = React.useMemo(() => collectMatches(text, re), [text, re])
+  const explanation = React.useMemo(() => explainRegex(pattern), [pattern])
+
+  const errorMsg = !re ? 'Pattern atau flags tidak valid.' : null
+
+  const copyMatches = async () => {
+    const payload = JSON.stringify(matches, null, 2)
+    await navigator.clipboard.writeText(payload)
+  }
+
+  return (
+    <section className="grid gap-6">
+      <div className="flex items-center gap-2">
+        <Regex className="h-5 w-5" />
+        <h1 className="text-xl font-semibold">Regex Tester & Explainer</h1>
+        <Badge variant="outline">MVP</Badge>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pattern</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="pattern">Regex Pattern</Label>
+            <Input id="pattern" value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="mis. ^[a-z]+$" />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="flags">Flags</Label>
+            <Input id="flags" value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="mis. gimuy" />
+            <div className="text-xs text-muted-foreground">g: global, i: ignore-case, m: multiline, s: dotAll, u: unicode, y: sticky</div>
+          </div>
+          {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Test Text</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} />
+          <Separator />
+          <div className="prose max-w-none rounded-md border p-3 text-sm">
+            {highlightMatches(text, re)}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" /> Explainer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {explanation.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Tidak ada penjelasan—mulai ketik pattern.</p>
+            ) : (
+              <ul className="list-disc pl-5 text-sm">
+                {explanation.map((n, i) => (
+                  <li key={i}>{n}</li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Matches & Groups</CardTitle>
+            <Button size="sm" variant="secondary" onClick={copyMatches}>
+              <Copy className="mr-2 h-4 w-4" /> Copy JSON
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-64 rounded border p-3">
+              <pre className="text-xs">{JSON.stringify(matches, null, 2)}</pre>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  )
+}

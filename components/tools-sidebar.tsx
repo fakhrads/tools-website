@@ -3,7 +3,7 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Wand2, Search, FileJson, House } from 'lucide-react'
+import { Menu, Wand2, Search, FileJson, House, Code, DockIcon, Code2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,9 @@ const MAIN: Item[] = [{ href: '/tools', label: 'All Tools', icon: <House classNa
 const PRIMARY: Item[] = [
   { href: '/tools/prettier', label: 'Code Prettier', icon: <Wand2 className="h-4 w-4" /> },
   { href: '/tools/json-lint', label: 'JSON Linter', icon: <FileJson className="h-4 w-4" /> },
+  { href: '/tools/regex-tester', label: 'Regex Tester', icon: <Code className="h-4 w-4" /> },
+  { href: '/tools/word-counter', label: 'Word Counter', icon: <DockIcon className="h-4 w-4" /> },
+  { href: '/tools/csv-to-json', label: 'CSV to JSON', icon: <Code2Icon className="h-4 w-4" /> },
 ]
 
 export function ToolsSidebar() {
