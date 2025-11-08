@@ -3,35 +3,45 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, Wand2, Search, FileJson, House, Code, DockIcon, Code2Icon } from 'lucide-react'
+import { Menu, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { ITEMS, CATEGORY_ORDER, searchItems, groupByCategory, type Item } from '@/lib/tools.items'
 
 function cn(...x: Array<string | false | null | undefined>) {
   return x.filter(Boolean).join(' ')
 }
 
-type Item = { href: string; label: string; icon: React.ReactNode; badge?: string }
-
-const MAIN: Item[] = [{ href: '/tools', label: 'All Tools', icon: <House className="h-4 w-4" /> }]
-const PRIMARY: Item[] = [
-  { href: '/tools/prettier', label: 'Code Prettier', icon: <Wand2 className="h-4 w-4" /> },
-  { href: '/tools/json-lint', label: 'JSON Linter', icon: <FileJson className="h-4 w-4" /> },
-  { href: '/tools/regex-tester', label: 'Regex Tester', icon: <Code className="h-4 w-4" /> },
-  { href: '/tools/word-counter', label: 'Word Counter', icon: <DockIcon className="h-4 w-4" /> },
-  { href: '/tools/csv-to-json', label: 'CSV to JSON', icon: <Code2Icon className="h-4 w-4" /> },
-]
+type NavItem = Pick<Item,'href'|'label'|'icon'>
 
 export function ToolsSidebar() {
   const pathname = usePathname()
   const [open, setOpen] = React.useState(false)
+  const [query, setQuery] = React.useState('')
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
-  const Section = ({ title, items }: { title: string; items: Item[] }) => (
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (!/INPUT|TEXTAREA|SELECT/.test(tag ?? '') && e.key === '/') {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const filtered = React.useMemo(() => searchItems(query), [query])
+  const grouped = React.useMemo(() => groupByCategory(filtered), [filtered])
+
+  const Section = ({ title, items }: { title: string; items: NavItem[] }) => (
     <>
-      <div className="px-2 text-[11px] font-semibold tracking-wider text-slate-500 uppercase">{title}</div>
+      <div className="px-2 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+        {title} <span className="ml-1 text-foreground/50">({items.length})</span>
+      </div>
       <ul className="mt-1 space-y-1">
         {items.map((item) => {
           const active = pathname === item.href
@@ -39,28 +49,22 @@ export function ToolsSidebar() {
             <li key={item.href}>
               <Link
                 href={item.href}
+                onClick={() => setOpen(false)}
                 className={cn(
                   'group flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                  active ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  active ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                 )}
                 aria-current={active ? 'page' : undefined}
               >
                 <span
                   className={cn(
                     'inline-flex h-7 w-7 items-center justify-center rounded-md border',
-                    active
-                      ? 'border-slate-300 bg-white'
-                      : 'border-transparent bg-slate-100 group-hover:bg-white group-hover:border-slate-200'
+                    active ? 'border-border bg-card' : 'border-transparent bg-muted group-hover:bg-card group-hover:border-border'
                   )}
                 >
                   {item.icon}
                 </span>
                 <span className="flex-1">{item.label}</span>
-                {item.badge && (
-                  <Badge variant={active ? 'secondary' : 'outline'} className="h-5 text-[10px]">
-                    {item.badge}
-                  </Badge>
-                )}
               </Link>
             </li>
           )
@@ -73,21 +77,35 @@ export function ToolsSidebar() {
     <>
       <div className="px-3 pb-2">
         <div className="relative">
-          <Input placeholder="Search tools…" className="pl-8 h-9 mt-2" />
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 mt-1" />
+          <Input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search tools…"
+            className="pl-8 h-9 mt-2"
+          />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground mt-1" />
         </div>
       </div>
 
       <ScrollArea className="flex-1">
         <nav className="px-2 py-1 space-y-4">
-          <Section title="Main" items={MAIN} />
-          <Section title="Tools" items={PRIMARY} />
+          {CATEGORY_ORDER.map(cat => {
+            const list = grouped.get(cat)
+            if (!list?.length) return null
+            // Map ke NavItem minimal
+            const items = list.map(it => ({ href: it.href, label: it.label, icon: it.icon }))
+            return <Section key={cat} title={cat} items={items} />
+          })}
+          {!CATEGORY_ORDER.some(c => grouped.get(c)?.length) && (
+            <div className="text-sm text-muted-foreground px-2">No results</div>
+          )}
         </nav>
       </ScrollArea>
 
-      <div className="border-t p-3">
-        <div className="text-xs text-slate-500">
-          Tip: tekan <kbd className="rounded border px-1 py-0.5 text-[10px]">/</kbd> untuk fokus pencarian
+      <div className="border-t border-border p-3">
+        <div className="text-xs text-muted-foreground">
+          Tip: tekan <kbd className="rounded border border-border px-1 py-0.5 text-[10px]">/</kbd> untuk fokus pencarian
         </div>
       </div>
     </>
@@ -95,20 +113,18 @@ export function ToolsSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar (sticky kiri) */}
       <aside className="hidden md:block">
-        <div className="sticky top-4 h-[calc(100vh-6rem)] w-64 shrink-0 rounded-2xl border bg-white shadow-md flex flex-col">
-          <div className="h-12 flex items-center px-3 border-b">
-            <div className="text-sm font-semibold text-slate-800">Tools</div>
+        <div className="sticky top-4 h-[calc(100vh-rem)] w-64 shrink-0 rounded-2xl border border-border bg-card text-card-foreground shadow-md flex flex-col">
+          <div className="h-12 flex items-center px-3 border-b border-border">
+            <div className="text-sm font-semibold">Tools Navigation</div>
           </div>
           {NavList}
         </div>
       </aside>
 
-      {/* Mobile header + sheet (di atas konten, full width) */}
       <div className="md:hidden mb-3">
         <Sheet open={open} onOpenChange={setOpen}>
-          <div className="h-12 flex items-center justify-between border rounded-2xl bg-white px-3">
+          <div className="h-12 flex items-center justify-between border border-border rounded-2xl bg-card text-card-foreground px-3">
             <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Open tools menu" asChild>
               <SheetTrigger>
                 <Menu className="h-5 w-5" />
@@ -117,9 +133,9 @@ export function ToolsSidebar() {
             <div className="text-sm font-semibold">Tools</div>
             <div className="w-9" />
           </div>
-          <SheetContent side="left" className="p-0 w-[86vw] max-w-[360px]">
-            <div className="h-12 flex items-center px-3 border-b">
-              <div className="text-sm font-semibold text-slate-800">Tools</div>
+          <SheetContent side="left" className="p-0 w-[86vw] max-w=[360px]">
+            <div className="h-12 flex items-center px-3 border-b border-border bg-card">
+              <div className="text-sm font-semibold">Tools</div>
             </div>
             {NavList}
           </SheetContent>

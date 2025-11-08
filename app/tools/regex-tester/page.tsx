@@ -69,7 +69,6 @@ function collectMatches(text: string, re: RegExp | null): MatchInfo[] {
   return out
 }
 
-// Sangat ringkas, level "heuristic" untuk MVP
 function explainRegex(pattern: string): string[] {
   const notes: string[] = []
   if (pattern.length === 0) return notes
@@ -135,7 +134,6 @@ export default function RegexTesterPage() {
       <div className="flex items-center gap-2">
         <Regex className="h-5 w-5" />
         <h1 className="text-xl font-semibold">Regex Tester & Explainer</h1>
-        <Badge variant="outline">MVP</Badge>
       </div>
 
       <Card>

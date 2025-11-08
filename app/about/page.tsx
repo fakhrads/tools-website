@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Code2, Cpu, Globe2, Rocket, Wrench } from 'lucide-react'
 
+
 export default function AboutPage() {
   const techs = [
     { name: 'Next.js 15', icon: Globe2 },
     { name: 'Tailwind CSS', icon: Wrench },
     { name: 'ShadCN UI', icon: Code2 },
-    { name: 'TypeScript', icon: Cpu },
+    { name: 'TypeScript', icon: Cpu }, 
     { name: 'Bun', icon: Rocket },
   ]
 

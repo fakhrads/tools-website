@@ -5,7 +5,21 @@ import Link from 'next/link'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Wand2, FileJson, Braces, Star, StarOff, ExternalLink, Info } from 'lucide-react'
+import {
+  Wand2,
+  FileJson,
+  Braces,
+  Star,
+  StarOff,
+  ExternalLink,
+  Info,
+  Regex,
+  Hash,
+  ShieldCheck,
+  Binary,
+  Clock,
+  Palette,
+} from 'lucide-react'
 
 type Tool = {
   id: string
@@ -31,6 +45,7 @@ const TOOLS: Tool[] = [
     category: 'Studio',
     tags: ['format', 'code'],
     version: '1.0',
+    updatedAt: '2025-11-06',
   },
   {
     id: 'jsonlint',
@@ -42,6 +57,74 @@ const TOOLS: Tool[] = [
     category: 'Studio',
     tags: ['json', 'lint'],
     version: '1.2',
+    updatedAt: '2025-11-05',
+  },
+  {
+    id: 'regex',
+    title: 'Regex Tester',
+    desc: 'Uji regex dengan flags dan highlight match.',
+    href: '/tools/regex',
+    icon: <Regex className="h-4 w-4" />,
+    status: 'Ready',
+    category: 'Utilities',
+    tags: ['regex', 'test'],
+    version: '1.0',
+    updatedAt: '2025-11-06',
+  },
+  {
+    id: 'uuid',
+    title: 'UUID Generator',
+    desc: 'Generate UUID v4/v7, copy cepat, batch mode.',
+    href: '/tools/uuid',
+    icon: <Hash className="h-4 w-4" />,
+    status: 'Ready',
+    category: 'Utilities',
+    tags: ['uuid', 'id'],
+    version: '1.0',
+  },
+  {
+    id: 'jwt',
+    title: 'JWT Decoder',
+    desc: 'Decode header & payload (tanpa kirim ke server).',
+    href: '/tools/jwt',
+    icon: <ShieldCheck className="h-4 w-4" />,
+    status: 'Beta',
+    category: 'Utilities',
+    tags: ['jwt', 'auth'],
+    version: '0.9',
+  },
+  {
+    id: 'base64',
+    title: 'Base64 <→ Text',
+    desc: 'Encode/decode Base64, URL-safe, file to Base64.',
+    href: '/tools/base64',
+    icon: <Binary className="h-4 w-4" />,
+    status: 'Ready',
+    category: 'Converters',
+    tags: ['encode', 'decode'],
+    version: '1.0',
+  },
+  {
+    id: 'timestamp',
+    title: 'Timestamp Converter',
+    desc: 'Unix ↔ Date, zona waktu & format ISO.',
+    href: '/tools/timestamp',
+    icon: <Clock className="h-4 w-4" />,
+    status: 'Ready',
+    category: 'Converters',
+    tags: ['time', 'date'],
+    version: '1.0',
+  },
+  {
+    id: 'color',
+    title: 'Color Picker',
+    desc: 'HEX/RGB/HSL, konversi & clipboard cepat.',
+    href: '/tools/color',
+    icon: <Palette className="h-4 w-4" />,
+    status: 'Beta',
+    category: 'Utilities',
+    tags: ['color', 'design'],
+    version: '0.8',
   },
   {
     id: 'csv2json',
@@ -71,12 +154,17 @@ export default function ToolsOverview() {
   const [favs, setFavs] = React.useState<string[]>(
     typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('tools_fav') || '[]') : []
   )
-  React.useEffect(() => { try { localStorage.setItem('tools_fav', JSON.stringify(favs)) } catch {} }, [favs])
-  const toggleFav = (id: string) => setFavs((xs) => xs.includes(id) ? xs.filter(x => x !== id) : [...xs, id])
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('tools_fav', JSON.stringify(favs))
+    } catch {}
+  }, [favs])
+  const toggleFav = (id: string) =>
+    setFavs((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id]))
 
   return (
     <div className="grid gap-6">
-      <h2 className="text-base font-semibold">All tools</h2>
+      <h2 className="text-base font-semibold text-foreground">All tools</h2>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 items-stretch">
         {TOOLS.map((t) => (
@@ -88,37 +176,43 @@ export default function ToolsOverview() {
 }
 
 function ToolCard({
-  tool, isFav, onFav,
-}: { tool: Tool; isFav: boolean; onFav: (id: string) => void }) {
+  tool,
+  isFav,
+  onFav,
+}: {
+  tool: Tool
+  isFav: boolean
+  onFav: (id: string) => void
+}) {
   const disabled = !tool.href || tool.status === 'Soon'
 
   return (
     <Card
       className={cx(
-        'h-full flex flex-col rounded-2xl border border-slate-200/70 shadow-sm transition-all',
+        'h-full flex flex-col rounded-2xl border border-border shadow-sm transition-all bg-card text-card-foreground',
         !disabled && 'hover:shadow-md hover:-translate-y-0.5'
       )}
     >
-      {/* CONTENT */}
       <CardContent className="flex flex-col p-4">
-        {/* Utility bar (no absolute) */}
         <div className="flex flex-wrap items-center gap-2 justify-between">
           <div className="flex items-center gap-2">
             {tool.status && (
               <Badge
-                variant={tool.status === 'New' ? 'secondary' : tool.status === 'Beta' ? 'outline' : 'secondary'}
-                className={tool.status === 'Ready' ? 'bg-slate-900 text-white' : ''}
+                variant={
+                  tool.status === 'New' ? 'secondary' : tool.status === 'Beta' ? 'outline' : 'secondary'
+                }
+                className={tool.status === 'Ready' ? 'bg-foreground text-background' : ''}
               >
                 {tool.status}
               </Badge>
             )}
             {tool.version && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-50 border text-slate-600">
+              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground">
                 v{tool.version}
               </span>
             )}
             {tool.updatedAt && (
-              <span className="text-[11px] text-slate-500 inline-flex items-center gap-1">
+              <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
                 <Info className="h-3.5 w-3.5" /> {relTime(tool.updatedAt)}
               </span>
             )}
@@ -127,7 +221,7 @@ function ToolCard({
           <Button
             size="icon"
             variant="outline"
-            className="h-8 w-8"
+            className="h-8 w-8 border-border"
             onClick={() => onFav(tool.id)}
             title={isFav ? 'Unpin' : 'Pin'}
           >
@@ -135,32 +229,33 @@ function ToolCard({
           </Button>
         </div>
 
-        {/* Header row */}
         <div className="mt-3 flex items-center gap-3 min-h-[48px]">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 ring-1 ring-slate-200">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted ring-1 ring-border">
             {tool.icon || <Braces className="h-4 w-4" />}
           </span>
           <div className="text-sm font-semibold leading-tight">{tool.title}</div>
         </div>
 
-        {/* Description */}
-        <p className="mt-3 text-sm text-slate-600 min-h-[56px]">{tool.desc}</p>
+        <p className="mt-3 text-sm text-muted-foreground min-h-[56px]">{tool.desc}</p>
 
-        {/* Tags */}
         {tool.tags?.length ? (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tool.tags.map((tg) => (
-              <span key={tg} className="text-[11px] px-2 py-0.5 rounded-full bg-slate-50 border text-slate-600">{tg}</span>
+              <span
+                key={tg}
+                className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground"
+              >
+                {tg}
+              </span>
             ))}
           </div>
         ) : null}
       </CardContent>
 
-      {/* FOOTER (link button ada di sini) */}
-      <CardFooter className="mt-auto border-t px-4 py-3">
+      <CardFooter className="mt-auto border-t border-border px-4 py-3">
         <div className="w-full">
           <div className="flex items-center justify-between">
-            <div className="text-xs text-slate-400">{tool.category}</div>
+            <div className="text-xs text-muted-foreground">{tool.category}</div>
 
             {disabled ? (
               <Button size="sm" variant="secondary" disabled>
@@ -175,9 +270,8 @@ function ToolCard({
             )}
           </div>
 
-          {/* Reserve slot untuk banner agar tinggi footer konsisten */}
           <div className={cx('mt-2', disabled ? '' : 'opacity-0 pointer-events-none')}>
-            <div className="rounded-md bg-slate-50 border text-xs text-slate-500 px-2 py-2">
+            <div className="rounded-md bg-muted border border-border text-xs text-muted-foreground px-2 py-2">
               Coming soon
             </div>
           </div>

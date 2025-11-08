@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,7 +34,6 @@ const inferExt = (parser: string) =>
   parser === 'html' ? 'html' :
   parser === 'css' ? 'css' : 'js'
 
-/* ================= Carbon-like Preview (optional highlight/export) ================= */
 function CarbonPreview({
   code, language, filename, open, onOpenChange
 }: { code: string; language: string; filename: string; open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -100,7 +99,7 @@ function CarbonPreview({
           </div>
 
           <DialogFooter className="flex items-center justify-between">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-muted-foreground">
               Tip: Klik "Download PNG" untuk menyimpan gambar beresolusi tinggi. 
             </div>
             <div className="flex gap-2">
@@ -114,15 +113,14 @@ function CarbonPreview({
   )
 }
 
-/* =================================== Page =================================== */
 export default function PrettierPage() {
   return (
     <section className="grid gap-6">
       <div className="flex items-center gap-2">
         <Wand2 className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">Code Formatter</h1>
+        <h1 className="text-xl font-semibold text-foreground">Code Formatter</h1>
       </div>
-      <Card className="border border-slate-200/80 rounded-2xl shadow-sm">
+      <Card className="border border-border rounded-2xl shadow-sm bg-card text-card-foreground">
         <CardContent>
           <PrettierFormatter />
         </CardContent>
@@ -144,7 +142,6 @@ function PrettierFormatter() {
   const [autoFormat, setAutoFormat] = React.useState(false)
   const [filename, setFilename] = React.useState<string>('snippet.' + inferExt(parser))
 
-  // JSON validity (only for parser=json)
   const [isJsonValid, setIsJsonValid] = React.useState<boolean | null>(null)
   React.useEffect(() => {
     if (parser !== 'json') { setIsJsonValid(null); return }
@@ -170,7 +167,6 @@ function PrettierFormatter() {
       const pPostcss = await import('prettier/plugins/postcss')
       const plugins = [pBabel, pEstree, pTypescript, pHtml, pMarkdown, pPostcss].map((m: any) => m.default || m)
 
-      // ✅ await supaya tidak jadi [object Promise] bila environment mengembalikan Promise
       const out = await (prettier as any).format(source, {
         parser, plugins, semi, singleQuote, tabWidth,
       })
@@ -186,21 +182,18 @@ function PrettierFormatter() {
     }
   }, [source, parser, semi, singleQuote, tabWidth])
 
-  // Auto-format (debounce ringan)
   React.useEffect(() => {
     if (!autoFormat) return
     const t = setTimeout(() => { formatNow() }, 350)
     return () => clearTimeout(t)
   }, [source, parser, semi, singleQuote, tabWidth, autoFormat, formatNow])
 
-  // Undo/Redo
   const [history, setHistory] = React.useState<string[]>([])
   const [future, setFuture] = React.useState<string[]>([])
   const onChangeSource = (val: string) => { setHistory((h) => [...h, source]); setFuture([]); setSource(val) }
   const undo = () => setHistory((h) => { if (!h.length) return h; const prev = h[h.length - 1]; setFuture((f) => [source, ...f]); setSource(prev); return h.slice(0, -1) })
   const redo = () => setFuture((f) => { if (!f.length) return f; const nxt = f[0]; setHistory((h) => [...h, source]); setSource(nxt); return f.slice(1) })
 
-  // Shortcut
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const meta = e.metaKey || e.ctrlKey
@@ -211,7 +204,6 @@ function PrettierFormatter() {
     return () => window.removeEventListener('keydown', onKey)
   }, [formatNow])
 
-  // Keep filename extension in sync
   React.useEffect(() => {
     const ext = inferExt(parser)
     setFilename((prev) => {
@@ -220,7 +212,6 @@ function PrettierFormatter() {
     })
   }, [parser])
 
-  // Diff (simple)
   const [showDiff, setShowDiff] = React.useState(false)
   const diffLines = React.useMemo(() => {
     if (!showDiff) return []
@@ -242,16 +233,14 @@ function PrettierFormatter() {
   return (
     <>
       <div className="grid gap-4">
-        {/* ===== Toolbar (flex-wrap, anti tumpang tindih) ===== */}
         <div className="flex flex-wrap items-end gap-3">
-          {/* kiri: controls */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:flex-wrap">
             <div className="grid gap-1.5">
               <Label htmlFor="parser">Parser</Label>
               <select
                 id="parser"
                 aria-label="Parser"
-                className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm"
+                className="h-9 rounded-md border border-border bg-background px-2 text-sm"
                 value={parser}
                 onChange={(e) => setParser(e.target.value as any)}
               >
@@ -280,13 +269,12 @@ function PrettierFormatter() {
                 Single quote
               </label>
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <Label htmlFor="autoformat" className="text-xs text-slate-600">Auto-format</Label>
+                <Label htmlFor="autoformat" className="text-xs text-muted-foreground">Auto-format</Label>
                 <Switch id="autoformat" checked={autoFormat} onCheckedChange={setAutoFormat} />
               </div>
             </div>
           </div>
 
-          {/* kanan: actions */}
           <div className="ml-auto flex items-center gap-2">
             <Button type="button" variant="outline" size="sm" onClick={undo} title="Undo">
               <Undo2 className="h-4 w-4 mr-1" /> Undo
@@ -300,7 +288,6 @@ function PrettierFormatter() {
             </Button>
           </div>
 
-          {/* row 2: status + file + copy/download/preview */}
           <div className="flex w-full flex-wrap items-center justify-between gap-2 pt-1">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="px-2 py-0.5">
@@ -311,7 +298,9 @@ function PrettierFormatter() {
                   variant="outline"
                   className={cx(
                     'px-2 py-0.5 border',
-                    isJsonValid ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-rose-50 border-rose-200 text-rose-700'
+                    isJsonValid
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-300'
+                      : 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-300'
                   )}
                 >
                   {isJsonValid ? 'Valid JSON' : 'Invalid JSON'}
@@ -334,7 +323,6 @@ function PrettierFormatter() {
           </div>
         </div>
 
-        {/* ===== Editors & Diff ===== */}
         <Tabs defaultValue="edit" className="w-full">
           <TabsList className="w-full flex gap-2 overflow-x-auto whitespace-nowrap no-scrollbar">
             <TabsTrigger value="edit">Editor</TabsTrigger>
@@ -347,7 +335,7 @@ function PrettierFormatter() {
                 <Label htmlFor="src">Source</Label>
                 <Textarea
                   id="src"
-                  className={cx('font-mono resize-none', PANEL_H)}
+                  className={cx('font-mono resize-none bg-background', PANEL_H)}
                   value={source}
                   onChange={(e) => onChangeSource(e.target.value)}
                   placeholder={`// Paste your code here`}
@@ -358,7 +346,7 @@ function PrettierFormatter() {
                 <Label htmlFor="out">Formatted</Label>
                 <Textarea
                   id="out"
-                  className={cx('font-mono resize-none', PANEL_H)}
+                  className={cx('font-mono resize-none bg-background', PANEL_H)}
                   value={formatted}
                   readOnly
                   spellCheck={false}
@@ -368,18 +356,38 @@ function PrettierFormatter() {
           </TabsContent>
 
           <TabsContent value="diff" className="mt-3">
-            <div className={cx('rounded-md border border-slate-200 bg-white p-0 overflow-hidden', PANEL_H)}>
+            <div className={cx('rounded-md border border-border bg-card p-0 overflow-hidden', PANEL_H)}>
               <div className="grid grid-cols-2 text-xs font-mono h-full">
-                <div className="border-r border-slate-200 overflow-auto p-2">
+                <div className="border-r border-border overflow-auto p-2">
                   {diffLines.map((r, i) => (
-                    <div key={i} className={cx('whitespace-pre', r.s==='del' ? 'bg-rose-50 text-rose-700' : r.s==='mod' ? 'bg-amber-50' : '')}>
+                    <div
+                      key={i}
+                      className={cx(
+                        'whitespace-pre',
+                        r.s === 'del'
+                          ? 'bg-destructive/10 text-destructive'
+                          : r.s === 'mod'
+                          ? 'bg-warning/10 text-foreground'
+                          : ''
+                      )}
+                    >
                       {r.left ?? ''}
                     </div>
                   ))}
                 </div>
                 <div className="overflow-auto p-2">
                   {diffLines.map((r, i) => (
-                    <div key={i} className={cx('whitespace-pre', r.s==='add' ? 'bg-emerald-50 text-emerald-700' : r.s==='mod' ? 'bg-amber-50' : '')}>
+                    <div
+                      key={i}
+                      className={cx(
+                        'whitespace-pre',
+                        r.s === 'add'
+                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/25 dark:text-emerald-300'
+                          : r.s === 'mod'
+                          ? 'bg-warning/10 text-foreground'
+                          : ''
+                      )}
+                    >
                       {r.right ?? ''}
                     </div>
                   ))}
@@ -390,12 +398,12 @@ function PrettierFormatter() {
         </Tabs>
 
         {err && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground">
             {err} — Pastikan paket <code>prettier</code> & plugin parsers terpasang.
           </div>
         )}
         <Separator />
-        <div className="text-xs text-slate-500">Shortcut: ⌘/Ctrl+Enter untuk Format. Auto-format bisa dimatikan jika source besar.</div>
+        <div className="text-xs text-muted-foreground">Shortcut: ⌘/Ctrl+Enter untuk Format. Auto-format bisa dimatikan jika source besar.</div>
       </div>
 
       <CarbonPreview

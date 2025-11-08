@@ -53,7 +53,6 @@ export default function WordCounterPage() {
       <div className="flex items-center gap-2">
         <BookOpen className="h-5 w-5" />
         <h1 className="text-xl font-semibold">Word Counter & Read-Time</h1>
-        <Badge variant="outline">MVP</Badge>
       </div>
 
       <Card>
