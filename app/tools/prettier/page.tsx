@@ -45,9 +45,17 @@ function CarbonPreview({
     ;(async () => {
       try {
         const hljs = (await import('highlight.js/lib/core')).default
-        const map: Record<string,string> = { babel:'javascript', javascript:'javascript', typescript:'typescript', json:'json', markdown:'markdown', html:'xml', css:'css' }
-        const lang = map[language] ?? 'javascript'
-        const mod = await import(`highlight.js/lib/languages/${lang}.js`)
+        const langMap: Record<string,string> = { babel:'javascript', javascript:'javascript', typescript:'typescript', json:'json', markdown:'markdown', html:'xml', css:'css' }
+        const lang = langMap[language] ?? 'javascript'
+        const langModules: Record<string, () => Promise<{default: unknown}>> = {
+          javascript: () => import('highlight.js/lib/languages/javascript'),
+          typescript: () => import('highlight.js/lib/languages/typescript'),
+          json:       () => import('highlight.js/lib/languages/json'),
+          markdown:   () => import('highlight.js/lib/languages/markdown'),
+          xml:        () => import('highlight.js/lib/languages/xml'),
+          css:        () => import('highlight.js/lib/languages/css'),
+        }
+        const mod = await (langModules[lang] ?? langModules.javascript)()
         hljs.registerLanguage(lang, (mod as any).default || mod)
         document.querySelectorAll('pre code.hljsable').forEach((el) => {
           try { hljs.highlightElement(el as HTMLElement) } catch {}
