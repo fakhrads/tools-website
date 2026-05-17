@@ -1,10 +1,13 @@
 'use client'
 
 import * as React from 'react'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Copy, Pipette, RefreshCcw, Download, Palette } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Copy, Pipette, RefreshCcw, Download } from 'lucide-react'
 
 type RGB = { r: number; g: number; b: number }
 type HSL = { h: number; s: number; l: number }
@@ -220,30 +223,31 @@ export default function ColorPickerPage(){
   }
 
   return (
-    <div className="grid gap-6">
+    <section className="grid gap-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
-          <Palette className="h-5 w-5" />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <h1 className="text-3xl font-bold tracking-tight">Color Picker</h1>
+          <Badge variant="secondary" className="text-sm">Palette • Contrast • Gradient</Badge>
         </div>
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">Color Picker</h1>
-          <p className="text-sm text-muted-foreground">Pick, convert, and generate color palettes — HEX, RGB, HSL, and more.</p>
-        </div>
+        <p className="text-muted-foreground max-w-2xl">
+          Pilih dan eksplorasi warna, buat palet, cek kontras, dan generate gradient dengan alat yang lengkap.
+        </p>
       </div>
 
-      {/* Main Color Picker Panel */}
-      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
-          <span className="text-sm font-medium">Color Picker</span>
-        </div>
-        <div className="p-5 grid gap-6">
+      {/* Main Color Picker Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Pilih Warna</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
           {/* Recent Colors */}
-          <div className="grid gap-2">
-            <Label className="text-sm font-medium">Recent Colors</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Warna Terbaru</Label>
             <div className="flex gap-2 flex-wrap">
               {recent.map(h => (
                 <button
+                  type="button"
                   key={h}
                   onClick={()=>setHexInput(h)}
                   className="h-8 w-8 rounded-lg border-2 border-muted shadow-sm hover:scale-105 transition-transform"
@@ -256,7 +260,7 @@ export default function ColorPickerPage(){
 
           {/* Color Input & Controls */}
           <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
-            <div className="grid gap-5">
+            <div className="space-y-6">
               {/* Main Color Picker */}
               <div className="flex items-start gap-4">
                 <input
@@ -266,22 +270,21 @@ export default function ColorPickerPage(){
                   onChange={(e)=>setHexSafe(e.target.value)}
                   className="h-14 w-14 rounded-xl border-2 border-muted cursor-pointer"
                 />
-                <div className="grid gap-3 flex-1">
+                <div className="space-y-3 flex-1">
                   <div className="flex gap-2 flex-wrap">
                     <Input
                       value={hexInput}
                       onChange={(e)=>setHexSafe(e.target.value)}
-                      className="w-40 font-mono text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                      className="w-40 font-mono text-sm"
                       placeholder="#2D79C7"
                     />
-                    <Button type="button" variant="secondary" onClick={()=>copy(hexInput)} size="sm">
+                    <Button variant="secondary" onClick={()=>copy(hexInput)} size="sm">
                       <Copy className="h-4 w-4 mr-2" /> Copy
                     </Button>
-                    <Button type="button" variant="outline" onClick={randomize} size="sm">
+                    <Button variant="outline" onClick={randomize} size="sm">
                       <RefreshCcw className="h-4 w-4 mr-2" /> Random
                     </Button>
                     <Button
-                      type="button"
                       variant="outline"
                       onClick={eyedrop}
                       size="sm"
@@ -292,11 +295,11 @@ export default function ColorPickerPage(){
                   </div>
 
                   {/* RGB/HSL Inputs */}
-                  <div className="grid gap-4">
-                    <div className="grid gap-2">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
                       <Label className="text-xs font-medium">RGB Values</Label>
                       <div className="flex gap-2">
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">R</Label>
                           <Input
                             value={rgb.r}
@@ -304,10 +307,10 @@ export default function ColorPickerPage(){
                             min={0}
                             max={255}
                             onChange={(e)=>setHexInput(rgbToHex({ r:clamp(+e.target.value||0,0,255), g:rgb.g, b:rgb.b }))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">G</Label>
                           <Input
                             value={rgb.g}
@@ -315,10 +318,10 @@ export default function ColorPickerPage(){
                             min={0}
                             max={255}
                             onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:clamp(+e.target.value||0,0,255), b:rgb.b }))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">B</Label>
                           <Input
                             value={rgb.b}
@@ -326,16 +329,16 @@ export default function ColorPickerPage(){
                             min={0}
                             max={255}
                             onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:rgb.g, b:clamp(+e.target.value||0,0,255) }))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid gap-2">
+                    <div className="space-y-2">
                       <Label className="text-xs font-medium">HSL Values</Label>
                       <div className="flex gap-2">
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">H</Label>
                           <Input
                             value={Math.round(hsl.h)}
@@ -343,10 +346,10 @@ export default function ColorPickerPage(){
                             min={0}
                             max={360}
                             onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:+e.target.value||0, s:hsl.s, l:hsl.l })))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">S</Label>
                           <Input
                             value={Math.round(hsl.s)}
@@ -354,10 +357,10 @@ export default function ColorPickerPage(){
                             min={0}
                             max={100}
                             onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:+e.target.value||0, l:hsl.l })))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
-                        <div className="grid gap-1 flex-1">
+                        <div className="space-y-1 flex-1">
                           <Label className="text-xs text-muted-foreground">L</Label>
                           <Input
                             value={Math.round(hsl.l)}
@@ -365,7 +368,7 @@ export default function ColorPickerPage(){
                             min={0}
                             max={100}
                             onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:hsl.s, l:+e.target.value||0 })))}
-                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                            className="font-mono text-sm h-9"
                           />
                         </div>
                       </div>
@@ -373,12 +376,12 @@ export default function ColorPickerPage(){
                   </div>
 
                   {/* Background Selector */}
-                  <div className="grid gap-2">
-                    <Label className="text-xs font-medium">Background for Contrast</Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium">Background untuk Kontras</Label>
                     <div className="flex items-center gap-2">
                       <select
                         title='bg'
-                        className="h-9 rounded-xl border border-border/60 bg-background px-3 text-sm flex-1"
+                        className="border rounded-lg h-9 px-2 text-sm flex-1"
                         value={bgHexPresetValue(bgHex)}
                         onChange={(e)=>setBgHexSafe(e.target.value)}
                       >
@@ -396,13 +399,13 @@ export default function ColorPickerPage(){
                       <Input
                         value={bgHex}
                         onChange={(e)=>setBgHexSafe(e.target.value)}
-                        className="w-32 font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                        className="w-32 font-mono text-sm h-9"
                       />
                     </div>
                   </div>
 
                   {/* Color Values Display */}
-                  <div className="text-xs text-muted-foreground font-mono grid gap-1">
+                  <div className="text-xs text-muted-foreground font-mono space-y-1">
                     <div>RGB: ({rgbStr})</div>
                     <div>HSL: ({hslStr})</div>
                   </div>
@@ -411,34 +414,27 @@ export default function ColorPickerPage(){
             </div>
 
             {/* Preview Section */}
-            <div className="rounded-xl border border-border/60 overflow-hidden">
+            <div className="rounded-xl border overflow-hidden shadow-sm">
+              {/* Contrast ratio bar — di atas preview, bukan absolute overlay */}
+              <div className="flex flex-wrap items-center gap-2 px-4 py-2 border-b bg-muted/30">
+                <ContrastBadge r={ratio} />
+                <Badge variant="outline" className="text-xs font-mono">{fmt(ratio,2)}:1</Badge>
+                <Badge variant="outline" className="text-xs">{ratioAA ? 'AA pass' : 'AA fail'}</Badge>
+                <Badge variant="outline" className="text-xs">{ratioAAA ? 'AAA pass' : 'AAA fail'}</Badge>
+                <Badge variant="outline" className="text-xs">{ratioLargePass ? 'Large AA' : 'Large fail'}</Badge>
+              </div>
               <div className="grid md:grid-cols-2 divide-x divide-y md:divide-y-0">
                 {/* Normal Preview */}
-                <div className="p-6 relative min-h-[200px]" style={{ background: rgbToHex(bg), color: baseHex }}>
-                  <div className="absolute top-3 left-3 z-10">
-                    <div
-                      className="inline-flex flex-wrap gap-1.5 rounded-lg px-3 py-2 text-xs backdrop-blur-sm"
-                      style={{
-                        background: 'color-mix(in oklab, transparent 70%, canvas 30%)',
-                        boxShadow: '0 2px 10px rgba(0,0,0,.08)'
-                      }}
-                    >
-                      <ContrastBadge r={ratio} />
-                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{fmt(ratio,2)}:1</span>
-                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioAA ? 'AA' : 'AA fail'}</span>
-                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioAAA ? 'AAA' : 'AAA fail'}</span>
-                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioLargePass ? 'Large AA' : 'Large fail'}</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-16 grid gap-4">
+                <div className="p-6 min-h-[200px]" style={{ background: rgbToHex(bg), color: baseHex }}>
+                  <div className="space-y-4">
                     <div className="text-2xl font-semibold">Headline Text Example</div>
                     <div className="text-base leading-relaxed">
                       Body text preview looks like this paragraph over the selected background color.
                       This helps you visualize how readable your text will be.
                     </div>
                     <button
-                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity w-fit"
+                      type="button"
+                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity"
                       style={{ background: 'transparent', color: 'inherit', borderColor: 'currentColor' }}
                     >
                       Example Button
@@ -449,13 +445,14 @@ export default function ColorPickerPage(){
                 {/* Inverted Preview */}
                 <div className="p-6 min-h-[200px]" style={{ background: baseHex, color: brandFgHex }}>
                   <div className="text-xs font-medium mb-4 opacity-80 uppercase tracking-wide">Inverted Preview</div>
-                  <div className="grid gap-4">
+                  <div className="space-y-4">
                     <div className="text-2xl font-semibold">Headline Text Example</div>
                     <div className="text-base leading-relaxed">
                       This shows how text looks when your color is used as a background instead.
                     </div>
                     <button
-                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity w-fit"
+                      type="button"
+                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity"
                       style={{ background: 'transparent', color: 'inherit', borderColor: 'currentColor' }}
                     >
                       Example Button
@@ -467,24 +464,25 @@ export default function ColorPickerPage(){
           </div>
 
           {/* Palette Section */}
-          <div className="grid gap-4">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">Color Palette</Label>
               <span className="text-xs text-muted-foreground">
-                Click to copy, Alt+Click for CSS variable
+                Klik untuk copy, Alt+Klik untuk copy CSS variable
               </span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
               {paletteArr.map(p => (
                 <button
+                  type="button"
                   key={p.key}
                   onClick={(ev)=>onChipClick(p, ev)}
-                  className="group rounded-xl border border-border/60 overflow-hidden text-left hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                  className="group rounded-xl border overflow-hidden text-left shadow-sm hover:shadow-md hover:border-border transition-all duration-200"
                 >
-                  <div className="h-20" style={{ background: p.hex }} />
-                  <div className="flex items-center justify-between px-3 py-3 bg-background">
-                    <div className="text-sm font-medium">brand-{p.key}</div>
-                    <div className="text-xs font-mono opacity-70 group-hover:opacity-100 transition-opacity">
+                  <div className="h-16" style={{ background: p.hex }} />
+                  <div className="px-2.5 py-2 bg-background grid gap-0.5">
+                    <div className="text-xs font-medium truncate">brand-{p.key}</div>
+                    <div className="text-xs font-mono text-muted-foreground truncate group-hover:text-foreground transition-colors">
                       {p.hex}
                     </div>
                   </div>
@@ -492,28 +490,28 @@ export default function ColorPickerPage(){
               ))}
             </div>
             <div className="flex gap-3 pt-2">
-              <Button type="button" size="sm" variant="secondary" onClick={()=>copy(cssVars)}>
+              <Button size="sm" variant="secondary" onClick={()=>copy(cssVars)}>
                 <Copy className="mr-2 h-4 w-4" /> Copy CSS Vars
               </Button>
-              <Button type="button" size="sm" variant="outline" onClick={()=>download('brand.css', cssVars)}>
+              <Button size="sm" variant="outline" onClick={()=>download('brand.css', cssVars)}>
                 <Download className="mr-2 h-4 w-4" /> Download CSS
               </Button>
-              <Button type="button" size="sm" variant="secondary" onClick={()=>copy(twLines)}>
+              <Button size="sm" variant="secondary" onClick={()=>copy(twLines)}>
                 <Copy className="mr-2 h-4 w-4" /> Copy Tailwind
               </Button>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Gradient Builder Panel */}
-      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
-          <span className="text-sm font-medium">Gradient Builder</span>
-        </div>
-        <div className="p-5 grid gap-5">
+      {/* Gradient Builder Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Gradient Builder</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
           <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-center">
-            <div className="grid gap-4">
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <input
                   title='alt color'
@@ -525,11 +523,11 @@ export default function ColorPickerPage(){
                 <Input
                   value={altHex}
                   onChange={(e)=>setAltHexSafe(e.target.value)}
-                  className="w-40 font-mono text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                  className="w-40 font-mono text-sm"
                   placeholder="#7AB0EA"
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="space-y-2">
                 <Label className="text-sm font-medium">Angle: {angle}°</Label>
                 <input
                   title='angle'
@@ -542,42 +540,42 @@ export default function ColorPickerPage(){
                 />
               </div>
             </div>
-            <div className="rounded-xl border border-border/60 h-40" style={{ background: gradientCss }} />
+            <div className="rounded-xl border h-40 shadow-inner" style={{ background: gradientCss }} />
           </div>
           <div className="flex gap-3">
             <Input
               readOnly
               value={gradientCss}
-              className="font-mono text-sm flex-1 bg-muted/40 border-border/60 rounded-xl"
+              className="font-mono text-sm flex-1"
             />
-            <Button type="button" variant="secondary" onClick={()=>copy(gradientCss)}>
+            <Button variant="secondary" onClick={()=>copy(gradientCss)}>
               <Copy className="mr-2 h-4 w-4" /> Copy CSS
             </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Design Tokens Panel */}
-      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
-        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
-          <span className="text-sm font-medium">Design Tokens</span>
-        </div>
-        <div className="p-5 grid gap-5">
-          <div className="grid gap-2">
+      {/* Design Tokens Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl">Design Tokens</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
             <Label className="text-sm font-medium">CSS Variables</Label>
-            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/60 bg-muted/40 p-4">
+            <ScrollArea className="h-48 rounded-lg border p-4 bg-muted/20">
               <pre className="text-xs font-mono leading-relaxed">{cssVars}</pre>
-            </div>
+            </ScrollArea>
           </div>
-          <div className="grid gap-2">
+          <div className="space-y-3">
             <Label className="text-sm font-medium">Tailwind Configuration</Label>
-            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/60 bg-muted/40 p-4">
+            <ScrollArea className="h-48 rounded-lg border p-4 bg-muted/20">
               <pre className="text-xs font-mono leading-relaxed">{twLines}</pre>
-            </div>
+            </ScrollArea>
           </div>
-        </div>
-      </div>
-    </div>
+        </CardContent>
+      </Card>
+    </section>
   )
 }
 
