@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -100,7 +99,7 @@ function CarbonPreview({
 
           <DialogFooter className="flex items-center justify-between">
             <div className="text-xs text-muted-foreground">
-              Tip: Klik "Download PNG" untuk menyimpan gambar beresolusi tinggi. 
+              Tip: Klik "Download PNG" untuk menyimpan gambar beresolusi tinggi.
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
@@ -115,17 +114,20 @@ function CarbonPreview({
 
 export default function PrettierPage() {
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <Wand2 className="h-5 w-5" />
-        <h1 className="text-xl font-semibold text-foreground">Code Formatter</h1>
+    <div className="grid gap-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <Wand2 className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Code Prettier</h1>
+          <p className="text-sm text-muted-foreground">Format JavaScript, TypeScript, JSON, HTML, CSS, and Markdown — powered by Prettier.</p>
+        </div>
       </div>
-      <Card className="border border-border rounded-2xl shadow-sm bg-card text-card-foreground">
-        <CardContent>
-          <PrettierFormatter />
-        </CardContent>
-      </Card>
-    </section>
+
+      <PrettierFormatter />
+    </div>
   )
 }
 
@@ -233,62 +235,65 @@ function PrettierFormatter() {
   return (
     <>
       <div className="grid gap-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:flex-wrap">
-            <div className="grid gap-1.5">
-              <Label htmlFor="parser">Parser</Label>
-              <select
-                id="parser"
-                aria-label="Parser"
-                className="h-9 rounded-md border border-border bg-background px-2 text-sm"
-                value={parser}
-                onChange={(e) => setParser(e.target.value as any)}
-              >
-                <option value="babel">JavaScript (Babel)</option>
-                <option value="typescript">TypeScript</option>
-                <option value="json">JSON</option>
-                <option value="markdown">Markdown</option>
-                <option value="html">HTML</option>
-                <option value="css">CSS</option>
-              </select>
-            </div>
+        {/* Options/controls area */}
+        <div className="rounded-2xl border border-border/60 bg-card p-4 flex flex-col gap-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:flex-wrap">
+              <div className="grid gap-1.5">
+                <Label htmlFor="parser">Parser</Label>
+                <select
+                  id="parser"
+                  aria-label="Parser"
+                  className="h-9 rounded-xl bg-muted/40 border border-border/60 focus:ring-primary/50 px-2 text-sm"
+                  value={parser}
+                  onChange={(e) => setParser(e.target.value as any)}
+                >
+                  <option value="babel">JavaScript (Babel)</option>
+                  <option value="typescript">TypeScript</option>
+                  <option value="json">JSON</option>
+                  <option value="markdown">Markdown</option>
+                  <option value="html">HTML</option>
+                  <option value="css">CSS</option>
+                </select>
+              </div>
 
-            <div className="grid gap-1.5">
-              <Label htmlFor="tabwidth">Tab Width</Label>
-              <Input id="tabwidth" type="number" min={1} max={8} value={tabWidth}
-                     onChange={(e) => setTabWidth(Number(e.target.value || 2))} />
-            </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="tabwidth">Tab Width</Label>
+                <Input id="tabwidth" type="number" min={1} max={8} value={tabWidth}
+                       onChange={(e) => setTabWidth(Number(e.target.value || 2))} />
+              </div>
 
-            <div className="flex items-center gap-5 pt-1">
-              <label className="flex items-center gap-2 text-sm whitespace-nowrap">
-                <input type="checkbox" className="accent-purple-600" checked={semi} onChange={(e) => setSemi(e.target.checked)} />
-                Semicolons
-              </label>
-              <label className="flex items-center gap-2 text-sm whitespace-nowrap">
-                <input type="checkbox" className="accent-purple-600" checked={singleQuote} onChange={(e) => setSingleQuote(e.target.checked)} />
-                Single quote
-              </label>
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <Label htmlFor="autoformat" className="text-xs text-muted-foreground">Auto-format</Label>
-                <Switch id="autoformat" checked={autoFormat} onCheckedChange={setAutoFormat} />
+              <div className="flex items-center gap-5 pt-1">
+                <label className="flex items-center gap-2 text-sm whitespace-nowrap">
+                  <input type="checkbox" className="accent-purple-600" checked={semi} onChange={(e) => setSemi(e.target.checked)} />
+                  Semicolons
+                </label>
+                <label className="flex items-center gap-2 text-sm whitespace-nowrap">
+                  <input type="checkbox" className="accent-purple-600" checked={singleQuote} onChange={(e) => setSingleQuote(e.target.checked)} />
+                  Single quote
+                </label>
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <Label htmlFor="autoformat" className="text-xs text-muted-foreground">Auto-format</Label>
+                  <Switch id="autoformat" checked={autoFormat} onCheckedChange={setAutoFormat} />
+                </div>
               </div>
             </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <Button type="button" variant="outline" size="sm" onClick={undo} title="Undo">
+                <Undo2 className="h-4 w-4 mr-1" /> Undo
+              </Button>
+              <Button type="button" variant="outline" size="sm" onClick={redo} title="Redo">
+                <Redo2 className="h-4 w-4 mr-1" /> Redo
+              </Button>
+              <Button type="button" size="sm" onClick={formatNow} disabled={loading} title="Format (⌘/Ctrl+Enter)">
+                {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Play className="h-4 w-4 mr-1" />}
+                Format
+              </Button>
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={undo} title="Undo">
-              <Undo2 className="h-4 w-4 mr-1" /> Undo
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={redo} title="Redo">
-              <Redo2 className="h-4 w-4 mr-1" /> Redo
-            </Button>
-            <Button type="button" size="sm" onClick={formatNow} disabled={loading} title="Format (⌘/Ctrl+Enter)">
-              {loading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Play className="h-4 w-4 mr-1" />}
-              Format
-            </Button>
-          </div>
-
-          <div className="flex w-full flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex w-full flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="px-2 py-0.5">
                 <Code2 className="h-3.5 w-3.5 mr-1" /> {parser.toUpperCase()}
@@ -299,8 +304,8 @@ function PrettierFormatter() {
                   className={cx(
                     'px-2 py-0.5 border',
                     isJsonValid
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-900 dark:text-emerald-300'
-                      : 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950/30 dark:border-rose-900 dark:text-rose-300'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                      : 'bg-rose-50 text-rose-700 border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20'
                   )}
                 >
                   {isJsonValid ? 'Valid JSON' : 'Invalid JSON'}
@@ -330,35 +335,37 @@ function PrettierFormatter() {
           </TabsList>
 
           <TabsContent value="edit" className="mt-3">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="src">Source</Label>
-                <Textarea
-                  id="src"
-                  className={cx('font-mono resize-none bg-background', PANEL_H)}
-                  value={source}
-                  onChange={(e) => onChangeSource(e.target.value)}
-                  placeholder={`// Paste your code here`}
-                  spellCheck={false}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="out">Formatted</Label>
-                <Textarea
-                  id="out"
-                  className={cx('font-mono resize-none bg-background', PANEL_H)}
-                  value={formatted}
-                  readOnly
-                  spellCheck={false}
-                />
+            <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-0">
+                <div className="grid gap-2 p-4 md:border-r md:border-border/60">
+                  <Label htmlFor="src">Source</Label>
+                  <Textarea
+                    id="src"
+                    className={cx('font-mono resize-none bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl', PANEL_H)}
+                    value={source}
+                    onChange={(e) => onChangeSource(e.target.value)}
+                    placeholder={`// Paste your code here`}
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="grid gap-2 p-4">
+                  <Label htmlFor="out">Formatted</Label>
+                  <Textarea
+                    id="out"
+                    className={cx('font-mono resize-none bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl', PANEL_H)}
+                    value={formatted}
+                    readOnly
+                    spellCheck={false}
+                  />
+                </div>
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="diff" className="mt-3">
-            <div className={cx('rounded-md border border-border bg-card p-0 overflow-hidden', PANEL_H)}>
+            <div className={cx('rounded-2xl border border-border/60 bg-card overflow-hidden', PANEL_H)}>
               <div className="grid grid-cols-2 text-xs font-mono h-full">
-                <div className="border-r border-border overflow-auto p-2">
+                <div className="border-r border-border/60 overflow-auto p-2">
                   {diffLines.map((r, i) => (
                     <div
                       key={i}
@@ -398,7 +405,7 @@ function PrettierFormatter() {
         </Tabs>
 
         {err && (
-          <div className="rounded-lg border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-foreground">
+          <div className="rounded-xl border border-rose-200/60 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500/20 px-3 py-2 text-sm text-rose-700 dark:text-rose-400">
             {err} — Pastikan paket <code>prettier</code> & plugin parsers terpasang.
           </div>
         )}

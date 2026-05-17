@@ -1,12 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Upload, Download, FileJson, Copy, Wand2 } from 'lucide-react'
 
 type ParseOptions = {
@@ -16,7 +14,7 @@ type ParseOptions = {
 
 // --- Utility: strip BOM ---
 function stripBOM(s: string) {
-  return s.replace(/^\uFEFF/, '')
+  return s.replace(/^﻿/, '')
 }
 
 // --- Auto-detect delimiter from first few lines (ignoring quoted fields) ---
@@ -217,88 +215,67 @@ smith79;5079;09ja61;js5079;Jamie;Smith;Engineering;Manchester`
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <FileJson className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">CSV → JSON Converter</h1>
-        <Badge variant="outline">Patched</Badge>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <FileJson className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">CSV → JSON</h1>
+          <p className="text-sm text-muted-foreground">Convert CSV to JSON with auto-delimiter detection, header mapping, and key normalization.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Input</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <div className="flex flex-wrap items-end gap-4">
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">CSV Input</span>
+          <div className="flex items-center gap-1.5">
+            <Input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
+              className="w-44 h-8 text-xs bg-muted/40 border-border/60 rounded-lg"
+            />
+            <Button size="sm" variant="ghost" onClick={() => setCsv('')}>
+              <Upload className="h-3.5 w-3.5 mr-1.5" /> Clear
+            </Button>
+            <Button size="sm" variant="ghost" onClick={loadSemicolonSample}>
+              <Wand2 className="h-3.5 w-3.5 mr-1.5" /> Load Sample
+            </Button>
+          </div>
+        </div>
+        <div className="p-4 grid gap-4">
+          <div className="grid sm:grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label className="inline-flex items-center gap-2">
-                <input
-                  title='Auto Detect Delimiter'
-                  type="checkbox"
-                  className="h-4 w-4"
-                  checked={autoDetect}
-                  onChange={(e) => setAutoDetect(e.target.checked)}
+              <Label className="text-xs font-medium">Delimiter</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="delimiter"
+                  type="text"
+                  inputMode="text"
+                  value={delimiter}
+                  onChange={handleDelimiterChange}
+                  onKeyDown={handleDelimiterKeyDown}
+                  className="w-20 h-8 text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                  disabled={autoDetect}
+                  placeholder=", ; | \t"
                 />
-                Auto-detect delimiter
-              </Label>
-
-              {/* Manual delimiter controls */}
-              <div className="flex items-end gap-2">
-                <div className="grid gap-1">
-                  <Label htmlFor="delimiter">Delimiter (manual)</Label>
-                  <Input
-                    id="delimiter"
-                    type="text"
-                    inputMode="text"
-                    value={delimiter}
-                    onChange={handleDelimiterChange}
-                    onKeyDown={handleDelimiterKeyDown}
-                    className="w-24"
-                    disabled={autoDetect}
-                    placeholder=", ; | TAB"
-                  />
-                  <div className="text-xs text-muted-foreground">
-                    {autoDetect
-                      ? <>Dipakai (auto): <b>{effDelimiter === '\t' ? 'TAB' : effDelimiter}</b></>
-                      : <>Manual: ketik 1 karakter, <code>\t</code> untuk TAB</>}
-                  </div>
+                <div className="flex items-center gap-1">
+                  <Button type="button" size="sm" variant="secondary" onClick={() => setManualDelimiter(',')} disabled={autoDetect} title="Comma">,</Button>
+                  <Button type="button" size="sm" variant="secondary" onClick={() => setManualDelimiter(';')} disabled={autoDetect} title="Semicolon">;</Button>
+                  <Button type="button" size="sm" variant="secondary" onClick={() => setManualDelimiter('\t')} disabled={autoDetect} title="Tab">TAB</Button>
+                  <Button type="button" size="sm" variant="secondary" onClick={() => setManualDelimiter('|')} disabled={autoDetect} title="Pipe">|</Button>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setManualDelimiter(',')}
-                    disabled={autoDetect}
-                    title="Comma"
-                  >,</Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setManualDelimiter(';')}
-                    disabled={autoDetect}
-                    title="Semicolon"
-                  >;</Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setManualDelimiter('\t')}
-                    disabled={autoDetect}
-                    title="Tab"
-                  >TAB</Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => setManualDelimiter('|')}
-                    disabled={autoDetect}
-                    title="Pipe"
-                  >|</Button>
-                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {autoDetect
+                  ? <>Dipakai (auto): <b>{effDelimiter === '\t' ? 'TAB' : effDelimiter}</b></>
+                  : <>Manual: ketik 1 karakter, <code>\t</code> untuk TAB</>}
               </div>
             </div>
 
-            <div className="grid gap-1">
-              <Label htmlFor="quote">Quote</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="quote" className="text-xs font-medium">Quote Character</Label>
               <Input
                 id="quote"
                 type="text"
@@ -306,65 +283,64 @@ smith79;5079;09ja61;js5079;Jamie;Smith;Engineering;Manchester`
                 value={quote}
                 maxLength={1}
                 onChange={(e) => setQuote(e.target.value || '"')}
-                className="w-24"
+                className="w-20 h-8 text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
               />
-            </div>
-
-            <div className="grid gap-1">
-              <Label className="inline-flex items-center gap-2">
-                <input title="Header" type="checkbox" className="h-4 w-4" checked={hasHeader} onChange={(e) => setHasHeader(e.target.checked)} />
-                Header di baris pertama
-              </Label>
-              <Label className="inline-flex items-center gap-2">
-                <input title="Trim" type="checkbox" className="h-4 w-4" checked={trimCells} onChange={(e) => setTrimCells(e.target.checked)} />
-                Trim spasi tiap sel
-              </Label>
-              <Label className="inline-flex items-center gap-2">
-                <input title="Normalize Keys" type="checkbox" className="h-4 w-4" checked={normalizeKeys} onChange={(e) => setNormalizeKeys(e.target.checked)} />
-                Normalize keys (snake_case)
-              </Label>
-            </div>
-
-            <div className="ml-auto flex gap-2">
-              <Input type="file" accept=".csv,text/csv" onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])} className="w-56" />
-              <Button variant="secondary" onClick={() => setCsv('')}>
-                <Upload className="mr-2 h-4 w-4" /> Clear
-              </Button>
-              <Button variant="outline" onClick={loadSemicolonSample}>
-                <Wand2 className="mr-2 h-4 w-4" /> Load contoh (;)
-              </Button>
+              <div className="flex flex-col gap-1.5 mt-1">
+                <Label className="inline-flex items-center gap-2 text-xs font-normal">
+                  <input
+                    title="Auto Detect Delimiter"
+                    type="checkbox"
+                    className="h-4 w-4"
+                    checked={autoDetect}
+                    onChange={(e) => setAutoDetect(e.target.checked)}
+                  />
+                  Auto-detect delimiter
+                </Label>
+                <Label className="inline-flex items-center gap-2 text-xs font-normal">
+                  <input title="Header" type="checkbox" className="h-4 w-4" checked={hasHeader} onChange={(e) => setHasHeader(e.target.checked)} />
+                  Header di baris pertama
+                </Label>
+                <Label className="inline-flex items-center gap-2 text-xs font-normal">
+                  <input title="Trim" type="checkbox" className="h-4 w-4" checked={trimCells} onChange={(e) => setTrimCells(e.target.checked)} />
+                  Trim spasi tiap sel
+                </Label>
+                <Label className="inline-flex items-center gap-2 text-xs font-normal">
+                  <input title="Normalize Keys" type="checkbox" className="h-4 w-4" checked={normalizeKeys} onChange={(e) => setNormalizeKeys(e.target.checked)} />
+                  Normalize keys (snake_case)
+                </Label>
+              </div>
             </div>
           </div>
 
-          <Label htmlFor="csv">CSV</Label>
-          <Textarea id="csv" rows={10} value={csv} onChange={(e) => setCsv(e.target.value)} />
-        </CardContent>
-      </Card>
+          <Textarea
+            id="csv"
+            rows={10}
+            value={csv}
+            onChange={(e) => setCsv(e.target.value)}
+            className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+          />
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Hasil JSON</CardTitle>
-          <div className="flex gap-2">
-            <Button onClick={copyJSON}><Copy className="mr-2 h-4 w-4" /> Copy</Button>
-            <Button variant="outline" onClick={downloadJSON}><Download className="mr-2 h-4 w-4" /> Download</Button>
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">JSON Output</span>
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" variant="ghost" onClick={copyJSON}><Copy className="h-3.5 w-3.5 mr-1.5" /> Copy</Button>
+            <Button size="sm" variant="ghost" onClick={downloadJSON}><Download className="h-3.5 w-3.5 mr-1.5" /> Download</Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <pre className="rounded border p-3 text-xs">{JSON.stringify(json, null, 2)}</pre>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="p-4">
+          <pre className="rounded-xl border border-border/60 bg-muted/40 p-4 text-xs font-mono overflow-auto max-h-80">{JSON.stringify(json, null, 2)}</pre>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Debug Info</CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs text-muted-foreground">
-          <div>Mode: <b>{autoDetect ? 'Auto' : 'Manual'}</b></div>
-          <div>Effective delimiter: <b>{effDelimiter === '\t' ? 'TAB' : effDelimiter}</b></div>
-          <div>Rows parsed: <b>{rows.length}</b></div>
-          <div>Columns (max): <b>{rows.reduce((m, r) => Math.max(m, r.length), 0)}</b></div>
-        </CardContent>
-      </Card>
-    </section>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground px-1">
+        <span>Mode: <b>{autoDetect ? 'Auto' : 'Manual'}</b></span>
+        <span>Effective delimiter: <b>{effDelimiter === '\t' ? 'TAB' : effDelimiter}</b></span>
+        <span>Rows parsed: <b>{rows.length}</b></span>
+        <span>Columns (max): <b>{rows.reduce((m, r) => Math.max(m, r.length), 0)}</b></span>
+      </div>
+    </div>
   )
 }

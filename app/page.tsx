@@ -2,155 +2,162 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Search, ExternalLink } from 'lucide-react'
-import { ITEMS, CATEGORY_ORDER, searchItems, groupByCategory, type Item } from '@/lib/tools.items'
+import { Badge } from '@/components/ui/badge'
+import { ArrowRight, Braces, Zap, Shield, Puzzle, Clock, ChevronRight } from 'lucide-react'
+import { TOOLS, type ToolItem } from '@/lib/tools-catalog'
 
-const cx = (...xs: Array<string | false | null | undefined>) => xs.filter(Boolean).join(' ')
-
-export default function ToolsOverview() {
-  const [q, setQ] = React.useState('')
-  const [tab, setTab] = React.useState<'All' | Item['category']>('All')
-  const inputRef = React.useRef<HTMLInputElement>(null)
+export default function HomePage() {
+  const router = useRouter()
+  const [recent, setRecent] = React.useState<Array<{ id: string; at: number }>>([])
+  const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      if (!/INPUT|TEXTAREA|SELECT/.test(tag ?? '') && e.key === '/') {
-        e.preventDefault()
-        inputRef.current?.focus()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    try {
+      setRecent(JSON.parse(localStorage.getItem('tools_recent') || '[]'))
+    } catch {}
+    setMounted(true)
   }, [])
 
-  const searched = React.useMemo(() => searchItems(q), [q])
+  const recentTools = React.useMemo(
+    () => recent.slice(0, 4).map(r => TOOLS.find(t => t.id === r.id)).filter((t): t is ToolItem => !!t),
+    [recent]
+  )
 
-  const listByTab = React.useMemo(() => {
-    if (tab === 'All') return searched.filter(i => i.href !== '/tools') // sembunyikan diri sendiri
-    return searched.filter(i => i.category === tab && i.href !== '/tools')
-  }, [searched, tab])
-
-  const grouped = React.useMemo(() => groupByCategory(listByTab), [listByTab])
-
-  const tabs = ['All', ...CATEGORY_ORDER.filter(c => c !== 'Main')] as const
+  const openTool = (t: ToolItem) => {
+    try {
+      const now = Date.now()
+      const list = [{ id: t.id, at: now }, ...recent.filter(x => x.id !== t.id)].slice(0, 12)
+      setRecent(list)
+      localStorage.setItem('tools_recent', JSON.stringify(list))
+    } catch {}
+    router.push(t.href)
+  }
 
   return (
-    <div className="grid gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-foreground">All tools</h2>
-      </div>
+    <div className="grid gap-16">
 
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <Input
-            ref={inputRef}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search tools…"
-            className="pl-8 h-9"
-          />
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-card px-8 py-14 sm:px-14 sm:py-20">
+        {/* Glow blobs */}
+        <div className="pointer-events-none absolute inset-0 [background:radial-gradient(55%_40%_at_50%_-5%,oklch(0.68_0.18_277/0.18),transparent)]" />
+        <div className="pointer-events-none absolute -top-32 -right-32 h-80 w-80 rounded-full bg-primary/8 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-violet-500/8 blur-3xl" />
+
+        <div className="relative flex flex-col items-start gap-6 max-w-2xl">
+          <Badge className="rounded-full bg-primary/10 text-primary border-primary/20 gap-1.5 text-xs font-medium">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            {TOOLS.length} tools available
+          </Badge>
+
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-[1.15]">
+              Developer tools,{' '}
+              <span className="bg-gradient-to-br from-indigo-500 via-violet-500 to-purple-600 bg-clip-text text-transparent">
+                all in one place
+              </span>
+            </h1>
+            <p className="mt-4 text-base text-muted-foreground max-w-lg leading-relaxed">
+              Fast, private, runs entirely in your browser.
+              <br></br>
+              No install, no account, no data leaving your machine.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Button asChild size="lg" className="rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 gap-2">
+              <Link href="/tools">
+                Browse Tools <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-xl border-border/60 gap-2">
+              <Link href="/docs">
+                How it works
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Recent tools (only if user has history) ── */}
+      {mounted && recentTools.length > 0 && (
+        <section className="grid gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <h2 className="text-sm font-semibold">Pick up where you left off</h2>
+            </div>
+            <Link
+              href="/tools"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              All tools <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {recentTools.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => openTool(t)}
+                className="group text-left flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all duration-150"
+              >
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted ring-1 ring-border/60 text-muted-foreground group-hover:text-primary group-hover:bg-accent transition-colors">
+                  {t.icon ?? <Braces className="h-4 w-4" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-medium truncate">{t.title}</div>
+                  <div className="text-xs text-muted-foreground">{t.category}</div>
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── Feature highlights ── */}
+      <section className="grid gap-5">
+        <div>
+          <h2 className="text-base font-semibold">Why DevTools Studio?</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Built for developers who value speed and privacy.</p>
         </div>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-          <TabsList className="flex flex-wrap gap-2">
-            {tabs.map(t => (
-              <TabsTrigger key={t} value={t} className="text-xs">{t}</TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <FeatureCard
+            icon={<Zap className="h-4 w-4" />}
+            title="Zero latency"
+            desc="Everything runs in the browser — instant results, works fully offline."
+          />
+          <FeatureCard
+            icon={<Shield className="h-4 w-4" />}
+            title="Privacy first"
+            desc="Your data never leaves your device. No tracking, no telemetry."
+          />
+          <FeatureCard
+            icon={<Puzzle className="h-4 w-4" />}
+            title="Extensible"
+            desc="Add a new tool in seconds — register it in the catalog and it appears everywhere."
+          />
+        </div>
+      </section>
 
-          {tabs.map(t => (
-            <TabsContent key={t} value={t} className="mt-4">
-              {t === 'All' ? (
-                <div className="grid gap-8">
-                  {CATEGORY_ORDER.filter(c => c !== 'Main').map(cat => {
-                    const list = grouped.get(cat as Item['category']) ?? []
-                    if (!list.length) return null
-                    return (
-                      <section key={cat} className="grid gap-3">
-                        <h3 className="text-sm font-semibold">{cat}</h3>
-                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 items-stretch">
-                          {list.map(tool => <ToolCard key={tool.href} tool={tool} />)}
-                        </div>
-                      </section>
-                    )
-                  })}
-                  {!CATEGORY_ORDER.some(c => (grouped.get(c as Item['category']) ?? []).length) && (
-                    <div className="text-sm text-muted-foreground">No results</div>
-                  )}
-                </div>
-              ) : (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 items-stretch">
-                  {(grouped.get(t as Item['category']) ?? []).map(tool => (
-                    <ToolCard key={tool.href} tool={tool} />
-                  ))}
-                  {!((grouped.get(t as Item['category']) ?? []).length) && (
-                    <div className="col-span-full text-sm text-muted-foreground">No results</div>
-                  )}
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
     </div>
   )
 }
 
-function ToolCard({ tool }: { tool: Item }) {
-  const disabled = !tool.href
-
+function FeatureCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
-    <Card
-      className={cx(
-        'h-full flex flex-col rounded-2xl border border-border shadow-sm transition-all bg-card text-card-foreground',
-        !disabled && 'hover:shadow-md hover:-translate-y-0.5'
-      )}
-    >
-      <CardContent className="flex flex-col p-4">
-        <div className="mt-1 flex items-center gap-3 min-h-[48px]">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted ring-1 ring-border">
-            {tool.icon}
-          </span>
-          <div className="text-sm font-semibold leading-tight">{tool.label}</div>
-        </div>
-
-        {tool.keywords?.length ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {tool.keywords.map((tg) => (
-              <span
-                key={tg}
-                className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground"
-              >
-                {tg}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </CardContent>
-
-      <CardFooter className="mt-auto border-t border-border px-4 py-3">
-        <div className="w-full flex items-center justify-between">
-          <div className="text-xs text-muted-foreground">{tool.category}</div>
-
-          {disabled ? (
-            <Button size="sm" variant="secondary" disabled>
-              Open <ExternalLink className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button asChild size="sm" variant="secondary" className="group">
-              <Link href={tool.href} aria-label={`Open ${tool.label}`}>
-                Open <ExternalLink className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </Button>
-          )}
-        </div>
-      </CardFooter>
-    </Card>
+    <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-6">
+      <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-primary">
+        {icon}
+      </div>
+      <div>
+        <div className="text-sm font-semibold">{title}</div>
+        <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{desc}</p>
+      </div>
+    </div>
   )
 }

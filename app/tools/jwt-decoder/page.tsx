@@ -1,12 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShieldCheck, Key, FileJson, AlertTriangle, CheckCircle2, Copy } from 'lucide-react'
 
@@ -113,13 +111,13 @@ export default function JwtDecoderPage() {
   const statusBadges = (
     <div className="flex flex-wrap gap-2">
       {exp && (exp.date.getTime() < now
-        ? <Badge variant="destructive"><AlertTriangle className="h-3.5 w-3.5 mr-1" /> expired</Badge>
-        : <Badge variant="outline">exp: {fmtDate(exp.date)}</Badge>)}
+        ? <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"><AlertTriangle className="h-3.5 w-3.5" /> expired</span>
+        : <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-border/60 bg-muted/40 text-muted-foreground">exp: {fmtDate(exp.date)}</span>)}
       {nbf && (nbf.date.getTime() > now
-        ? <Badge variant="destructive">nbf: {fmtDate(nbf.date)} (not yet valid)</Badge>
-        : <Badge variant="outline">nbf: {fmtDate(nbf.date)}</Badge>)}
-      {iat && <Badge variant="outline">iat: {fmtDate(iat.date)}</Badge>}
-      {!decoded?.signatureB64u && <Badge variant="destructive">unsigned (no signature)</Badge>}
+        ? <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">nbf: {fmtDate(nbf.date)} (not yet valid)</span>
+        : <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-border/60 bg-muted/40 text-muted-foreground">nbf: {fmtDate(nbf.date)}</span>)}
+      {iat && <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-border/60 bg-muted/40 text-muted-foreground">iat: {fmtDate(iat.date)}</span>}
+      {!decoded?.signatureB64u && <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20">unsigned (no signature)</span>}
     </div>
   )
 
@@ -154,80 +152,130 @@ export default function JwtDecoderPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <ShieldCheck className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">JWT Decoder</h1>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <ShieldCheck className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">JWT Decoder</h1>
+          <p className="text-sm text-muted-foreground">Decode and verify JSON Web Tokens — runs entirely in your browser, nothing sent to servers.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Token</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <Textarea rows={5} placeholder="tempelkan JWT di sini (header.payload.signature)" value={token} onChange={(e) => setToken(e.target.value)} />
-          <div className="text-xs text-muted-foreground">
-            Token tidak dikirim ke server—decode dilakukan di browser.
+      {/* Token input panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">JWT Token</span>
+          <div className="flex items-center gap-1.5">
+            {verifyResult.ok === null ? null : verifyResult.ok
+              ? <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"><CheckCircle2 className="h-3.5 w-3.5" /> valid</span>
+              : <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"><AlertTriangle className="h-3.5 w-3.5" /> invalid</span>
+            }
           </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle>Header</CardTitle>
-            <Badge variant="outline">{hdr.alg ? `alg: ${hdr.alg}` : 'no alg'}</Badge>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-60 rounded border p-3">
-              <pre className="text-xs">{JSON.stringify(hdr, null, 2)}</pre>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle>Payload</CardTitle>
-            <Button variant="outline" onClick={copyDecoded}><Copy className="mr-2 h-4 w-4" /> Copy JSON</Button>
-          </CardHeader>
-          <CardContent className="grid gap-2">
-            {statusBadges}
-            <ScrollArea className="h-60 rounded border p-3">
-              <pre className="text-xs">{JSON.stringify(pay, null, 2)}</pre>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+        </div>
+        <div className="p-4 grid gap-3">
+          <Textarea
+            rows={5}
+            placeholder="Paste JWT here (header.payload.signature)"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+          />
+          <div className="text-xs text-muted-foreground">
+            Token is not sent to any server — decoding happens entirely in your browser.
+          </div>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Verify Signature (opsional)</CardTitle>
-          <Badge variant={verifyResult.ok === null ? 'outline' : verifyResult.ok ? 'default' : 'destructive'}>
-            {verifyResult.ok === null ? 'idle' : verifyResult.ok ? <><CheckCircle2 className="h-3.5 w-3.5 mr-1" /> valid</> : <><AlertTriangle className="h-3.5 w-3.5 mr-1" /> invalid</>}
-          </Badge>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+      {/* Header / Payload panels */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <span className="text-sm font-medium">Header</span>
+            <div className="flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-border/60 bg-muted/40 text-muted-foreground">
+                {hdr.alg ? `alg: ${hdr.alg}` : 'no alg'}
+              </span>
+            </div>
+          </div>
+          <div className="p-4">
+            <ScrollArea className="h-52 rounded-xl border border-border/60 bg-muted/40 p-3">
+              <pre className="text-xs font-mono leading-relaxed">{JSON.stringify(hdr, null, 2)}</pre>
+            </ScrollArea>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <span className="text-sm font-medium">Payload</span>
+            <div className="flex items-center gap-1.5">
+              <Button size="sm" variant="outline" onClick={copyDecoded} className="h-7 px-2.5 text-xs">
+                <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy JSON
+              </Button>
+            </div>
+          </div>
+          <div className="p-4 grid gap-3">
+            {statusBadges}
+            <ScrollArea className="h-52 rounded-xl border border-border/60 bg-muted/40 p-3">
+              <pre className="text-xs font-mono leading-relaxed">{JSON.stringify(pay, null, 2)}</pre>
+            </ScrollArea>
+          </div>
+        </div>
+      </div>
+
+      {/* Verify Signature panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Verify Signature (optional)</span>
+          <div className="flex items-center gap-1.5">
+            {verifyResult.ok === null
+              ? <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium border border-border/60 bg-muted/40 text-muted-foreground">idle</span>
+              : verifyResult.ok
+              ? <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"><CheckCircle2 className="h-3.5 w-3.5" /> valid</span>
+              : <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20"><AlertTriangle className="h-3.5 w-3.5" /> invalid</span>
+            }
+          </div>
+        </div>
+        <div className="p-4 grid gap-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="grid gap-1">
-              <Label>Algoritma</Label>
-              <Input list="alg-list" value={alg} onChange={(e) => setAlg(e.target.value)} />
+              <Label>Algorithm</Label>
+              <Input
+                list="alg-list"
+                value={alg}
+                onChange={(e) => setAlg(e.target.value)}
+                className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+              />
               <datalist id="alg-list">
                 <option value="auto" />
                 <option value="HS256" />
                 <option value="RS256" />
               </datalist>
-              <p className="text-xs text-muted-foreground">auto: mengikuti header.alg</p>
+              <p className="text-xs text-muted-foreground">auto: follows header.alg</p>
             </div>
             { (alg === 'HS256' || (alg === 'auto' && decoded?.alg === 'HS256')) && (
               <div className="grid gap-1">
                 <Label><Key className="inline h-3.5 w-3.5 mr-1" /> Secret (HS256)</Label>
-                <Input type="password" value={secret} onChange={(e)=>setSecret(e.target.value)} placeholder="shared secret" />
+                <Input
+                  type="password"
+                  value={secret}
+                  onChange={(e)=>setSecret(e.target.value)}
+                  placeholder="shared secret"
+                  className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                />
               </div>
             )}
             { (alg === 'RS256' || (alg === 'auto' && decoded?.alg === 'RS256')) && (
               <div className="grid gap-1 md:col-span-2">
                 <Label>Public Key (PEM, RS256)</Label>
-                <Textarea rows={5} value={publicKey} onChange={(e)=>setPublicKey(e.target.value)} placeholder={`-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----`} />
+                <Textarea
+                  rows={5}
+                  value={publicKey}
+                  onChange={(e)=>setPublicKey(e.target.value)}
+                  placeholder={`-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----`}
+                  className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                />
               </div>
             )}
           </div>
@@ -235,8 +283,8 @@ export default function JwtDecoderPage() {
             <Button onClick={doVerify}><FileJson className="mr-2 h-4 w-4" /> Verify</Button>
           </div>
           {verifyResult.msg && <p className="text-sm">{verifyResult.msg}</p>}
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </div>
   )
 }

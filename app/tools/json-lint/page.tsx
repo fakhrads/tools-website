@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -164,18 +163,20 @@ function JsonNode({ name, value }: { name?: string; value: any }) {
 /* =============== page =============== */
 export default function JsonLintPage() {
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <FileJson className="h-5 w-5" />
-        <h1 className="text-xl font-semibold text-foreground">JSON Lint</h1>
+    <div className="grid gap-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <FileJson className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">JSON Lint</h1>
+          <p className="text-sm text-muted-foreground">Format, validate, and analyze JSON — fully client-side.</p>
+        </div>
       </div>
 
-      <Card className="border border-border rounded-2xl shadow-sm bg-card text-card-foreground">
-        <CardContent>
-          <JsonLintTool />
-        </CardContent>
-      </Card>
-    </section>
+      <JsonLintTool />
+    </div>
   )
 }
 
@@ -305,15 +306,15 @@ function JsonLintTool() {
   return (
     <div className="grid gap-4">
       {/* ===== Top toolbar ===== */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-card px-4 py-3">
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
             className={cx(
               'px-2 py-0.5 border',
               isValid
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-900'
-                : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-300 dark:border-rose-900',
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
+                : 'bg-rose-50 text-rose-700 border-rose-200/60 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
             )}
             title={isValid ? 'JSON is valid' : 'JSON is invalid'}
           >
@@ -358,7 +359,7 @@ function JsonLintTool() {
         </div>
 
         {/* Mobile options */}
-        <details className="sm:hidden rounded-md border border-border bg-card text-card-foreground">
+        <details className="sm:hidden w-full rounded-xl border border-border/60 bg-card">
           <summary className="list-none cursor-pointer px-3 py-2 text-sm flex items-center justify-between">
             <span>Options</span>
             <span className="text-muted-foreground">▾</span>
@@ -398,9 +399,9 @@ function JsonLintTool() {
       {/* ===== Main grid ===== */}
       <div className="grid gap-4 md:grid-cols-2 items-start">
         {/* Left: Input */}
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-2">
-            <Label htmlFor="json-in" className="text-foreground">
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <Label htmlFor="json-in" className="text-sm font-medium">
               JSON Input
             </Label>
             <div className="flex items-center gap-1.5">
@@ -436,10 +437,10 @@ function JsonLintTool() {
             </div>
           </div>
 
-          <div className="flex-1">
+          <div className="p-4">
             <Textarea
               id="json-in"
-              className={cx('font-mono resize-none bg-background', PANEL_H)}
+              className={cx('font-mono resize-none bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl', PANEL_H)}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               spellCheck={false}
@@ -448,9 +449,9 @@ function JsonLintTool() {
         </div>
 
         {/* Right: Output */}
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-2">
-            <Label htmlFor="json-out" className="text-foreground">
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <Label htmlFor="json-out" className="text-sm font-medium">
               Output
             </Label>
             <div className="flex items-center gap-1.5">
@@ -478,86 +479,88 @@ function JsonLintTool() {
             </div>
           </div>
 
-          <Tabs defaultValue="text" className="flex-1 flex flex-col h-[300px] sm:h-[360px] md:h-[400px]">
-            <TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap no-scrollbar">
-              <TabsTrigger value="text" className="flex items-center gap-2 flex-shrink-0">
-                <FileJson className="h-4 w-4" /> <span className="hidden xs:inline">Text</span>
-              </TabsTrigger>
-              <TabsTrigger value="tree" className="flex items-center gap-2 flex-shrink-0">
-                <ListTree className="h-4 w-4" /> <span className="hidden xs:inline">Tree</span>
-              </TabsTrigger>
-              <TabsTrigger value="stats" className="flex items-center gap-2 flex-shrink-0">
-                <BarChart4 className="h-4 w-4" /> <span className="hidden xs:inline">Stats</span>
-              </TabsTrigger>
-            </TabsList>
+          <div className="p-4">
+            <Tabs defaultValue="text" className="flex flex-col h-[300px] sm:h-[360px] md:h-[400px]">
+              <TabsList className="flex gap-2 overflow-x-auto whitespace-nowrap no-scrollbar">
+                <TabsTrigger value="text" className="flex items-center gap-2 flex-shrink-0">
+                  <FileJson className="h-4 w-4" /> <span className="hidden xs:inline">Text</span>
+                </TabsTrigger>
+                <TabsTrigger value="tree" className="flex items-center gap-2 flex-shrink-0">
+                  <ListTree className="h-4 w-4" /> <span className="hidden xs:inline">Tree</span>
+                </TabsTrigger>
+                <TabsTrigger value="stats" className="flex items-center gap-2 flex-shrink-0">
+                  <BarChart4 className="h-4 w-4" /> <span className="hidden xs:inline">Stats</span>
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="text" className="mt-2 h-full">
-              <Textarea
-                id="json-out"
-                className="font-mono resize-none h-full bg-background"
-                value={output}
-                readOnly
-                spellCheck={false}
-              />
-            </TabsContent>
+              <TabsContent value="text" className="mt-2 flex-1">
+                <Textarea
+                  id="json-out"
+                  className="font-mono resize-none h-full bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+                  value={output}
+                  readOnly
+                  spellCheck={false}
+                />
+              </TabsContent>
 
-            <TabsContent value="tree" className="mt-2 h-full">
-              <div className="rounded-md border border-border bg-card p-3 h-full overflow-auto">
-                {parsed ? (
-                  <JsonNode value={parsed} />
-                ) : (
-                  <div className="text-sm text-muted-foreground">Tidak ada data untuk ditampilkan.</div>
-                )}
-              </div>
-            </TabsContent>
+              <TabsContent value="tree" className="mt-2 flex-1">
+                <div className="rounded-xl border border-border/60 bg-card p-3 h-full overflow-auto">
+                  {parsed ? (
+                    <JsonNode value={parsed} />
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Tidak ada data untuk ditampilkan.</div>
+                  )}
+                </div>
+              </TabsContent>
 
-            <TabsContent value="stats" className="mt-2 h-full">
-              <div className="rounded-md border border-border bg-card p-3 text-sm h-full overflow-auto grid grid-cols-1 gap-0.5">
-                {stats ? (
-                  <>
-                    <div>
-                      <span className="text-muted-foreground">Bytes:</span>{' '}
-                      <span className="font-medium">{stats.bytes.toLocaleString()}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Depth:</span>{' '}
-                      <span className="font-medium">{stats.depth}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Keys:</span>{' '}
-                      <span className="font-medium">{stats.keys}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Arrays:</span>{' '}
-                      <span className="font-medium">{stats.arrays}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Objects:</span>{' '}
-                      <span className="font-medium">{stats.objects}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Strings:</span>{' '}
-                      <span className="font-medium">{stats.strings}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Numbers:</span>{' '}
-                      <span className="font-medium">{stats.numbers}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Booleans:</span>{' '}
-                      <span className="font-medium">{stats.booleans}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Nulls:</span>{' '}
-                      <span className="font-medium">{stats.nulls}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-muted-foreground">Tidak ada statistik yang bisa dihitung.</div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+              <TabsContent value="stats" className="mt-2 flex-1">
+                <div className="rounded-xl border border-border/60 bg-card p-3 text-sm h-full overflow-auto grid grid-cols-1 gap-0.5">
+                  {stats ? (
+                    <>
+                      <div>
+                        <span className="text-muted-foreground">Bytes:</span>{' '}
+                        <span className="font-medium">{stats.bytes.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Depth:</span>{' '}
+                        <span className="font-medium">{stats.depth}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Keys:</span>{' '}
+                        <span className="font-medium">{stats.keys}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Arrays:</span>{' '}
+                        <span className="font-medium">{stats.arrays}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Objects:</span>{' '}
+                        <span className="font-medium">{stats.objects}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Strings:</span>{' '}
+                        <span className="font-medium">{stats.strings}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Numbers:</span>{' '}
+                        <span className="font-medium">{stats.numbers}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Booleans:</span>{' '}
+                        <span className="font-medium">{stats.booleans}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Nulls:</span>{' '}
+                        <span className="font-medium">{stats.nulls}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-muted-foreground">Tidak ada statistik yang bisa dihitung.</div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
 

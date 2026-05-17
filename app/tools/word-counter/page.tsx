@@ -1,12 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Copy, Timer, BookOpen, FileJson } from 'lucide-react'
+import { Copy, Timer, BookOpen, FileJson, X } from 'lucide-react'
 
 type Stats = {
   words: number
@@ -49,60 +46,76 @@ export default function WordCounterPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <BookOpen className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">Word Counter & Read-Time</h1>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <BookOpen className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Word Counter</h1>
+          <p className="text-sm text-muted-foreground">Count words, characters, sentences, and estimate reading time.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Teks</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <Label htmlFor="wc-text" className="text-sm">Masukkan teks</Label>
-          <Textarea id="wc-text" rows={10} value={text} onChange={(e) => setText(e.target.value)} />
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => setText('')}>Clear</Button>
-            <Button onClick={copyStats}><Copy className="mr-2 h-4 w-4" /> Copy Stats (JSON)</Button>
-            <Button variant="outline" onClick={downloadJSON}><FileJson className="mr-2 h-4 w-4" /> Download</Button>
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Input Text</span>
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" variant="ghost" onClick={() => setText('')}>
+              <X className="h-3.5 w-3.5 mr-1.5" /> Clear
+            </Button>
+            <Button size="sm" variant="ghost" onClick={copyStats}>
+              <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy Stats
+            </Button>
+            <Button size="sm" variant="ghost" onClick={downloadJSON}>
+              <FileJson className="h-3.5 w-3.5 mr-1.5" /> Download
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="p-4">
+          <Textarea
+            id="wc-text"
+            rows={10}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+          />
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Statistik</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="grid grid-cols-2 gap-3 text-sm md:grid-cols-3">
-            <li className="rounded border p-3">
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Statistics</span>
+        </div>
+        <div className="p-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="text-xs text-muted-foreground">Kata</div>
-              <div className="text-xl font-semibold">{stats.words}</div>
-            </li>
-            <li className="rounded border p-3">
+              <div className="mt-1 text-2xl font-bold tabular-nums">{stats.words}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="text-xs text-muted-foreground">Karakter (dengan spasi)</div>
-              <div className="text-xl font-semibold">{stats.charsWithSpaces}</div>
-            </li>
-            <li className="rounded border p-3">
+              <div className="mt-1 text-2xl font-bold tabular-nums">{stats.charsWithSpaces}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="text-xs text-muted-foreground">Karakter (tanpa spasi)</div>
-              <div className="text-xl font-semibold">{stats.charsNoSpaces}</div>
-            </li>
-            <li className="rounded border p-3">
+              <div className="mt-1 text-2xl font-bold tabular-nums">{stats.charsNoSpaces}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="text-xs text-muted-foreground">Kalimat</div>
-              <div className="text-xl font-semibold">{stats.sentences}</div>
-            </li>
-            <li className="rounded border p-3">
+              <div className="mt-1 text-2xl font-bold tabular-nums">{stats.sentences}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="text-xs text-muted-foreground">Paragraf</div>
-              <div className="text-xl font-semibold">{stats.paragraphs}</div>
-            </li>
-            <li className="rounded border p-3">
+              <div className="mt-1 text-2xl font-bold tabular-nums">{stats.paragraphs}</div>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-4">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Timer className="h-3.5 w-3.5" /> Perkiraan baca</div>
-              <div className="text-xl font-semibold">~{stats.readingTimeMin} menit</div>
-            </li>
-          </ul>
-        </CardContent>
-      </Card>
-    </section>
+              <div className="mt-1 text-2xl font-bold tabular-nums">~{stats.readingTimeMin} menit</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }

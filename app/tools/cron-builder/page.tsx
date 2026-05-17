@@ -1,12 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { AlarmClock, Wand2, Copy } from 'lucide-react'
 
 const COMMON_TZS = [
@@ -252,17 +249,28 @@ export default function CronBuilderPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <AlarmClock className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">Cron Expression Builder</h1>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <AlarmClock className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Cron Builder</h1>
+          <p className="text-sm text-muted-foreground">Build and preview cron expressions with human-readable descriptions and next run times.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ekspresi Cron</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
+      {/* Expression Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Expression</span>
+          <div className="flex items-center gap-1.5">
+            <Button type="button" variant="outline" size="sm" onClick={async () => navigator.clipboard.writeText(expr)}>
+              <Copy className="mr-2 h-4 w-4" /> Copy
+            </Button>
+          </div>
+        </div>
+        <div className="p-4 grid gap-3">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="grid gap-1">
               <Label>Expression (5/6/7-field)</Label>
@@ -270,6 +278,7 @@ export default function CronBuilderPage() {
                 value={expr}
                 onChange={e => setExpr(e.target.value)}
                 placeholder="*/5 * * * *"
+                className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
               />
               <p className="text-xs text-muted-foreground">
                 Format:
@@ -303,6 +312,7 @@ export default function CronBuilderPage() {
                 list="tz-list"
                 value={tz}
                 onChange={e => setTz(e.target.value)}
+                className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
               />
               <datalist id="tz-list">
                 {COMMON_TZS.map(t => (
@@ -353,21 +363,16 @@ export default function CronBuilderPage() {
               Monthly (1st, now HH:mm)
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>
-            Next
-            {' '}
-            {count}
-            {' '}
-            Runs (
-            {tzSafe}
-            )
-          </CardTitle>
-          <div className="flex items-center gap-2">
+      {/* Next Runs Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">
+            Next {count} Runs ({tzSafe})
+          </span>
+          <div className="flex items-center gap-1.5">
             <div className="flex items-center gap-2">
               <Label className="text-xs text-muted-foreground">Count</Label>
               <Input
@@ -380,36 +385,34 @@ export default function CronBuilderPage() {
                     Math.max(1, Math.min(100, Number(e.target.value || 10))),
                   )
                 }
-                className="w-24"
+                className="w-20 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
               />
             </div>
-            <Button variant="outline" onClick={copyUpcoming}>
+            <Button type="button" variant="outline" size="sm" onClick={copyUpcoming}>
               <Copy className="mr-2 h-4 w-4" />
               Copy JSON
             </Button>
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div className="p-4">
           {error ? (
             <p className="text-sm text-red-600">{error}</p>
           ) : (
-            <ScrollArea className="h-80 rounded border p-3">
-              <ol className="grid gap-2 text-sm list-decimal pl-5">
-                {list.map((d, i) => (
-                  <li key={i} className="rounded border p-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium" suppressHydrationWarning>
-                        {fmtLong(d, tzSafe)}
-                      </span>
-                      <Badge variant="outline">{d.toISOString()}</Badge>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            </ScrollArea>
+            <div className="grid gap-2 max-h-80 overflow-y-auto">
+              {list.map((d, i) => (
+                <div key={i} className="rounded-xl border border-border/60 bg-muted/30 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-sm" suppressHydrationWarning>
+                      {fmtLong(d, tzSafe)}
+                    </span>
+                    <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded-md shrink-0">{d.toISOString()}</code>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </div>
   )
 }

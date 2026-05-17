@@ -1,15 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { Copy, Download, Play, Plus, Trash2 } from 'lucide-react'
+import { Copy, Play, Plus, Trash2, Globe } from 'lucide-react'
 
 type KV = { k: string; v: string; on: boolean }
 type ReqSaved = {
@@ -128,42 +126,61 @@ export default function HttpRequesterPage() {
   const hdrRows = headers.map((h, i) => (
     <div key={i} className="grid grid-cols-[auto_1fr_1fr_auto] gap-2 md:gap-3 items-center">
       <input title='Checkbox' type="checkbox" checked={h.on} onChange={e=>{ const a=[...headers]; a[i]={...h,on:e.target.checked}; setHeaders(a)}} />
-      <Input placeholder="Header" value={h.k} onChange={e=>{ const a=[...headers]; a[i]={...h,k:e.target.value}; setHeaders(a)}} className="min-w-0" />
-      <Input placeholder="Value" value={h.v} onChange={e=>{ const a=[...headers]; a[i]={...h,v:e.target.value}; setHeaders(a)}} className="min-w-0" />
+      <Input placeholder="Header" value={h.k} onChange={e=>{ const a=[...headers]; a[i]={...h,k:e.target.value}; setHeaders(a)}} className="min-w-0 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />
+      <Input placeholder="Value" value={h.v} onChange={e=>{ const a=[...headers]; a[i]={...h,v:e.target.value}; setHeaders(a)}} className="min-w-0 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />
       <Button variant="ghost" size="icon" onClick={()=>setHeaders(headers.filter((_,x)=>x!==i))}><Trash2 className="h-4 w-4" /></Button>
     </div>
   ))
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <h1 className="text-xl font-semibold">HTTP Requester</h1>
-        <Badge variant="outline">Mini Postman</Badge>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <Globe className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">HTTP Requester</h1>
+          <p className="text-sm text-muted-foreground">Make HTTP requests directly from your browser — supports headers, auth, and body modes.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-wrap items-center gap-3">
-          <Select value={method} onValueChange={(v)=>setMethod(v)}>
-            <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'].map(m=><SelectItem key={m} value={m}>{m}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Input value={url} onChange={(e)=>setUrl(e.target.value)} placeholder="https://api.example.com/path" className="flex-1 min-w-0" />
-          <Button disabled={busy} onClick={run}><Play className="mr-2 h-4 w-4" /> Send</Button>
-          <Button variant="secondary" onClick={saveReq}><Plus className="mr-2 h-4 w-4" /> Save</Button>
-          <label className="ml-auto inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={!!useProxy} onChange={e=>setUseProxy(e.target.checked as any)} />
-            Proxy
-          </label>
-        </CardHeader>
+      {/* Request Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Request</span>
+          <div className="flex items-center gap-1.5">
+            <Button type="button" disabled={busy} onClick={run} size="sm"><Play className="mr-2 h-4 w-4" /> Send</Button>
+            <Button type="button" variant="secondary" size="sm" onClick={saveReq}><Plus className="mr-2 h-4 w-4" /> Save</Button>
+          </div>
+        </div>
+        <div className="p-4 grid gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Select value={method} onValueChange={(v)=>setMethod(v)}>
+              <SelectTrigger className="w-32 bg-muted/40 border-border/60 rounded-xl"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {['GET','POST','PUT','PATCH','DELETE','HEAD','OPTIONS'].map(m=><SelectItem key={m} value={m}>{m}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input value={url} onChange={(e)=>setUrl(e.target.value)} placeholder="https://api.example.com/path" className="flex-1 min-w-0 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={!!useProxy} onChange={e=>setUseProxy(e.target.checked as any)} />
+              Proxy
+            </label>
+          </div>
+        </div>
+      </div>
 
-        <CardContent className="grid gap-8">
+      {/* Configuration Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Configuration</span>
+        </div>
+        <div className="p-4 grid gap-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="grid gap-3">
               <div className="flex items-center justify-between">
                 <Label>Headers</Label>
-                <Button variant="outline" size="sm" onClick={addHeader}><Plus className="mr-2 h-4 w-4" /> Add Header</Button>
+                <Button type="button" variant="outline" size="sm" onClick={addHeader}><Plus className="mr-2 h-4 w-4" /> Add Header</Button>
               </div>
               <div className="grid gap-2">{hdrRows}</div>
             </div>
@@ -176,11 +193,11 @@ export default function HttpRequesterPage() {
                   <label className="inline-flex items-center gap-2"><input type="radio" name="auth" checked={auth.type==='bearer'} onChange={()=>setAuth({...auth,type:'bearer'})} />Bearer</label>
                   <label className="inline-flex items-center gap-2"><input type="radio" name="auth" checked={auth.type==='basic'} onChange={()=>setAuth({...auth,type:'basic'})} />Basic</label>
                 </div>
-                {auth.type==='bearer' && <Input placeholder="Token" value={auth.bearer||''} onChange={e=>setAuth({...auth,bearer:e.target.value})} />}
+                {auth.type==='bearer' && <Input placeholder="Token" value={auth.bearer||''} onChange={e=>setAuth({...auth,bearer:e.target.value})} className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />}
                 {auth.type==='basic' && (
                   <div className="grid grid-cols-2 gap-2">
-                    <Input placeholder="Username" value={auth.basicUser||''} onChange={e=>setAuth({...auth,basicUser:e.target.value})} />
-                    <Input type="password" placeholder="Password" value={auth.basicPass||''} onChange={e=>setAuth({...auth,basicPass:e.target.value})} />
+                    <Input placeholder="Username" value={auth.basicUser||''} onChange={e=>setAuth({...auth,basicUser:e.target.value})} className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />
+                    <Input type="password" placeholder="Password" value={auth.basicPass||''} onChange={e=>setAuth({...auth,basicPass:e.target.value})} className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />
                   </div>
                 )}
               </div>
@@ -188,46 +205,47 @@ export default function HttpRequesterPage() {
               <div className="grid gap-2">
                 <div className="flex items-center gap-3">
                   <Label>Body</Label>
-                  <select title='Body' className="border rounded h-9 px-2" value={bodyMode} onChange={e=>setBodyMode(e.target.value)}>
+                  <select title='Body' className="h-9 rounded-xl border border-border/60 bg-background px-3 text-sm" value={bodyMode} onChange={e=>setBodyMode(e.target.value)}>
                     <option value="none">none</option>
                     <option value="json">json</option>
                     <option value="text">text</option>
                     <option value="form">form-urlencoded</option>
                   </select>
-                  {bodyMode==='json' && <Badge variant="outline">content-type: application/json</Badge>}
-                  {bodyMode==='form' && <Badge variant="outline">content-type: application/x-www-form-urlencoded</Badge>}
+                  {bodyMode==='json' && <span className="text-xs text-muted-foreground">content-type: application/json</span>}
+                  {bodyMode==='form' && <span className="text-xs text-muted-foreground">content-type: application/x-www-form-urlencoded</span>}
                 </div>
                 {bodyMode!=='none' && (
                   <>
-                    {bodyMode==='json' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='{"key":"value"}' className="font-mono" />}
-                    {bodyMode==='text' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='Plain text' className="font-mono" />}
-                    {bodyMode==='form' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='key=value\nfoo=bar' className="font-mono" />}
+                    {bodyMode==='json' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='{"key":"value"}' className="font-mono bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />}
+                    {bodyMode==='text' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='Plain text' className="font-mono bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />}
+                    {bodyMode==='form' && <Textarea rows={8} value={bodyText} onChange={e=>setBodyText(e.target.value)} placeholder='key=value\nfoo=bar' className="font-mono bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl" />}
                   </>
                 )}
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Response</CardTitle>
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={copyCurl}><Copy className="mr-2 h-4 w-4" /> curl</Button>
-            <Button variant="outline" onClick={copyFetch}><Copy className="mr-2 h-4 w-4" /> fetch</Button>
+      {/* Response Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Response</span>
+          <div className="flex items-center gap-1.5">
+            <Button type="button" variant="secondary" size="sm" onClick={copyCurl}><Copy className="mr-2 h-4 w-4" /> curl</Button>
+            <Button type="button" variant="outline" size="sm" onClick={copyFetch}><Copy className="mr-2 h-4 w-4" /> fetch</Button>
           </div>
-        </CardHeader>
-        <CardContent className="grid gap-3">
+        </div>
+        <div className="p-4 grid gap-3">
           {err && <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-700">{err}</div>}
 
           {resp && (
             <>
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <StatusBadge code={resp.status} text={resp.statusText} />
-                <Badge variant="outline">{resp.duration} ms</Badge>
-                <Badge variant="outline">{resp.size} B{resp.truncated ? ' • truncated' : ''}</Badge>
-                {resp.contentType && <Badge variant="outline">{resp.contentType}</Badge>}
+                <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{resp.duration} ms</span>
+                <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{resp.size} B{resp.truncated ? ' • truncated' : ''}</span>
+                {resp.contentType && <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{resp.contentType}</span>}
               </div>
 
               <div className="grid md:grid-cols-3 gap-3">
@@ -268,17 +286,18 @@ export default function HttpRequesterPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Saved</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2">
+      {/* Saved Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Saved</span>
+        </div>
+        <div className="p-4 grid gap-2">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
             {saved.map(s => (
-              <div key={s.id} className="rounded border p-3 text-sm">
+              <div key={s.id} className="rounded-xl border border-border/60 bg-muted/30 p-3 text-sm">
                 <div className="flex items-center justify-between">
                   <div className="font-medium">{s.name}</div>
                   <Button size="icon" variant="ghost" onClick={()=>delReq(s.id)}><Trash2 className="h-4 w-4" /></Button>
@@ -290,9 +309,9 @@ export default function HttpRequesterPage() {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </div>
   )
 }
 

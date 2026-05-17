@@ -1,13 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Copy, Pipette, RefreshCcw, Download } from 'lucide-react'
+import { Copy, Pipette, RefreshCcw, Download, Palette } from 'lucide-react'
 
 type RGB = { r: number; g: number; b: number }
 type HSL = { h: number; s: number; l: number }
@@ -223,34 +220,34 @@ export default function ColorPickerPage(){
   }
 
   return (
-    <section className="grid gap-8 p-6 max-w-7xl mx-auto">
+    <div className="grid gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">Color Picker</h1>
-          <Badge variant="secondary" className="text-sm">Palette • Contrast • Gradient</Badge>
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <Palette className="h-5 w-5" />
         </div>
-        <p className="text-muted-foreground max-w-2xl">
-          Pilih dan eksplorasi warna, buat palet, cek kontras, dan generate gradient dengan alat yang lengkap.
-        </p>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Color Picker</h1>
+          <p className="text-sm text-muted-foreground">Pick, convert, and generate color palettes — HEX, RGB, HSL, and more.</p>
+        </div>
       </div>
 
-      {/* Main Color Picker Card */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Pilih Warna</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-8">
+      {/* Main Color Picker Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Color Picker</span>
+        </div>
+        <div className="p-5 grid gap-6">
           {/* Recent Colors */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium">Warna Terbaru</Label>
+          <div className="grid gap-2">
+            <Label className="text-sm font-medium">Recent Colors</Label>
             <div className="flex gap-2 flex-wrap">
               {recent.map(h => (
-                <button 
-                  key={h} 
-                  onClick={()=>setHexInput(h)} 
-                  className="h-8 w-8 rounded-lg border-2 border-muted shadow-sm hover:scale-105 transition-transform" 
-                  style={{background:h}} 
+                <button
+                  key={h}
+                  onClick={()=>setHexInput(h)}
+                  className="h-8 w-8 rounded-lg border-2 border-muted shadow-sm hover:scale-105 transition-transform"
+                  style={{background:h}}
                   title={h}
                 />
               ))}
@@ -259,115 +256,116 @@ export default function ColorPickerPage(){
 
           {/* Color Input & Controls */}
           <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
-            <div className="space-y-6">
+            <div className="grid gap-5">
               {/* Main Color Picker */}
               <div className="flex items-start gap-4">
-                <input 
-                  aria-label="picker" 
-                  type="color" 
-                  value={baseHex} 
-                  onChange={(e)=>setHexSafe(e.target.value)} 
-                  className="h-14 w-14 rounded-xl border-2 border-muted cursor-pointer" 
+                <input
+                  aria-label="picker"
+                  type="color"
+                  value={baseHex}
+                  onChange={(e)=>setHexSafe(e.target.value)}
+                  className="h-14 w-14 rounded-xl border-2 border-muted cursor-pointer"
                 />
-                <div className="space-y-3 flex-1">
+                <div className="grid gap-3 flex-1">
                   <div className="flex gap-2 flex-wrap">
-                    <Input 
-                      value={hexInput} 
-                      onChange={(e)=>setHexSafe(e.target.value)} 
-                      className="w-40 font-mono text-sm" 
+                    <Input
+                      value={hexInput}
+                      onChange={(e)=>setHexSafe(e.target.value)}
+                      className="w-40 font-mono text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                       placeholder="#2D79C7"
                     />
-                    <Button variant="secondary" onClick={()=>copy(hexInput)} size="sm">
+                    <Button type="button" variant="secondary" onClick={()=>copy(hexInput)} size="sm">
                       <Copy className="h-4 w-4 mr-2" /> Copy
                     </Button>
-                    <Button variant="outline" onClick={randomize} size="sm">
+                    <Button type="button" variant="outline" onClick={randomize} size="sm">
                       <RefreshCcw className="h-4 w-4 mr-2" /> Random
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={eyedrop} 
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={eyedrop}
                       size="sm"
                       disabled={typeof window==='undefined' || !(window as any).EyeDropper}
                     >
                       <Pipette className="h-4 w-4 mr-2" /> Eyedrop
                     </Button>
                   </div>
-                  
+
                   {/* RGB/HSL Inputs */}
-                  <div className="space-y-4">
-                    <div className="space-y-2">
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
                       <Label className="text-xs font-medium">RGB Values</Label>
                       <div className="flex gap-2">
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">R</Label>
-                          <Input 
-                            value={rgb.r} 
-                            type="number" 
-                            min={0} 
-                            max={255} 
-                            onChange={(e)=>setHexInput(rgbToHex({ r:clamp(+e.target.value||0,0,255), g:rgb.g, b:rgb.b }))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={rgb.r}
+                            type="number"
+                            min={0}
+                            max={255}
+                            onChange={(e)=>setHexInput(rgbToHex({ r:clamp(+e.target.value||0,0,255), g:rgb.g, b:rgb.b }))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">G</Label>
-                          <Input 
-                            value={rgb.g} 
-                            type="number" 
-                            min={0} 
-                            max={255} 
-                            onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:clamp(+e.target.value||0,0,255), b:rgb.b }))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={rgb.g}
+                            type="number"
+                            min={0}
+                            max={255}
+                            onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:clamp(+e.target.value||0,0,255), b:rgb.b }))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">B</Label>
-                          <Input 
-                            value={rgb.b} 
-                            type="number" 
-                            min={0} 
-                            max={255} 
-                            onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:rgb.g, b:clamp(+e.target.value||0,0,255) }))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={rgb.b}
+                            type="number"
+                            min={0}
+                            max={255}
+                            onChange={(e)=>setHexInput(rgbToHex({ r:rgb.r, g:rgb.g, b:clamp(+e.target.value||0,0,255) }))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="grid gap-2">
                       <Label className="text-xs font-medium">HSL Values</Label>
                       <div className="flex gap-2">
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">H</Label>
-                          <Input 
-                            value={Math.round(hsl.h)} 
-                            type="number" 
-                            min={0} 
-                            max={360} 
-                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:+e.target.value||0, s:hsl.s, l:hsl.l })))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={Math.round(hsl.h)}
+                            type="number"
+                            min={0}
+                            max={360}
+                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:+e.target.value||0, s:hsl.s, l:hsl.l })))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">S</Label>
-                          <Input 
-                            value={Math.round(hsl.s)} 
-                            type="number" 
-                            min={0} 
-                            max={100} 
-                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:+e.target.value||0, l:hsl.l })))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={Math.round(hsl.s)}
+                            type="number"
+                            min={0}
+                            max={100}
+                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:+e.target.value||0, l:hsl.l })))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
-                        <div className="space-y-1 flex-1">
+                        <div className="grid gap-1 flex-1">
                           <Label className="text-xs text-muted-foreground">L</Label>
-                          <Input 
-                            value={Math.round(hsl.l)} 
-                            type="number" 
-                            min={0} 
-                            max={100} 
-                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:hsl.s, l:+e.target.value||0 })))} 
-                            className="font-mono text-sm h-9"
+                          <Input
+                            value={Math.round(hsl.l)}
+                            type="number"
+                            min={0}
+                            max={100}
+                            onChange={(e)=>setHexInput(rgbToHex(hslToRgb({ h:hsl.h, s:hsl.s, l:+e.target.value||0 })))}
+                            className="font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                           />
                         </div>
                       </div>
@@ -375,36 +373,36 @@ export default function ColorPickerPage(){
                   </div>
 
                   {/* Background Selector */}
-                  <div className="space-y-2">
-                    <Label className="text-xs font-medium">Background untuk Kontras</Label>
+                  <div className="grid gap-2">
+                    <Label className="text-xs font-medium">Background for Contrast</Label>
                     <div className="flex items-center gap-2">
-                      <select 
+                      <select
                         title='bg'
-                        className="border rounded-lg h-9 px-2 text-sm flex-1" 
-                        value={bgHexPresetValue(bgHex)} 
+                        className="h-9 rounded-xl border border-border/60 bg-background px-3 text-sm flex-1"
+                        value={bgHexPresetValue(bgHex)}
                         onChange={(e)=>setBgHexSafe(e.target.value)}
                       >
                         <option value="#FFFFFF">White</option>
                         <option value="#000000">Black</option>
                         <option value={bgHex}>Custom</option>
                       </select>
-                      <input 
+                      <input
                         title='bg'
-                        type="color" 
-                        value={rgbToHex(bg)} 
-                        onChange={(e)=>setBgHexSafe(e.target.value)} 
-                        className="h-9 w-9 rounded-lg border cursor-pointer" 
+                        type="color"
+                        value={rgbToHex(bg)}
+                        onChange={(e)=>setBgHexSafe(e.target.value)}
+                        className="h-9 w-9 rounded-lg border cursor-pointer"
                       />
-                      <Input 
-                        value={bgHex} 
-                        onChange={(e)=>setBgHexSafe(e.target.value)} 
-                        className="w-32 font-mono text-sm h-9" 
+                      <Input
+                        value={bgHex}
+                        onChange={(e)=>setBgHexSafe(e.target.value)}
+                        className="w-32 font-mono text-sm h-9 bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                       />
                     </div>
                   </div>
 
                   {/* Color Values Display */}
-                  <div className="text-xs text-muted-foreground font-mono space-y-1">
+                  <div className="text-xs text-muted-foreground font-mono grid gap-1">
                     <div>RGB: ({rgbStr})</div>
                     <div>HSL: ({hslStr})</div>
                   </div>
@@ -413,7 +411,7 @@ export default function ColorPickerPage(){
             </div>
 
             {/* Preview Section */}
-            <div className="rounded-xl border overflow-hidden shadow-sm">
+            <div className="rounded-xl border border-border/60 overflow-hidden">
               <div className="grid md:grid-cols-2 divide-x divide-y md:divide-y-0">
                 {/* Normal Preview */}
                 <div className="p-6 relative min-h-[200px]" style={{ background: rgbToHex(bg), color: baseHex }}>
@@ -426,21 +424,21 @@ export default function ColorPickerPage(){
                       }}
                     >
                       <ContrastBadge r={ratio} />
-                      <Badge variant="outline" className="text-xs">{fmt(ratio,2)}:1</Badge>
-                      <Badge variant="outline" className="text-xs">{ratioAA ? 'AA' : 'AA fail'}</Badge>
-                      <Badge variant="outline" className="text-xs">{ratioAAA ? 'AAA' : 'AAA fail'}</Badge>
-                      <Badge variant="outline" className="text-xs">{ratioLargePass ? 'Large AA' : 'Large fail'}</Badge>
+                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{fmt(ratio,2)}:1</span>
+                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioAA ? 'AA' : 'AA fail'}</span>
+                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioAAA ? 'AAA' : 'AAA fail'}</span>
+                      <span className="rounded border border-border/60 bg-muted/40 px-2 py-0.5 text-xs">{ratioLargePass ? 'Large AA' : 'Large fail'}</span>
                     </div>
                   </div>
 
-                  <div className="pt-16 space-y-4">
+                  <div className="pt-16 grid gap-4">
                     <div className="text-2xl font-semibold">Headline Text Example</div>
                     <div className="text-base leading-relaxed">
-                      Body text preview looks like this paragraph over the selected background color. 
+                      Body text preview looks like this paragraph over the selected background color.
                       This helps you visualize how readable your text will be.
                     </div>
-                    <button 
-                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity" 
+                    <button
+                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity w-fit"
                       style={{ background: 'transparent', color: 'inherit', borderColor: 'currentColor' }}
                     >
                       Example Button
@@ -451,13 +449,13 @@ export default function ColorPickerPage(){
                 {/* Inverted Preview */}
                 <div className="p-6 min-h-[200px]" style={{ background: baseHex, color: brandFgHex }}>
                   <div className="text-xs font-medium mb-4 opacity-80 uppercase tracking-wide">Inverted Preview</div>
-                  <div className="space-y-4">
+                  <div className="grid gap-4">
                     <div className="text-2xl font-semibold">Headline Text Example</div>
                     <div className="text-base leading-relaxed">
                       This shows how text looks when your color is used as a background instead.
                     </div>
-                    <button 
-                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity" 
+                    <button
+                      className="px-4 py-2 rounded-md border font-medium hover:opacity-90 transition-opacity w-fit"
                       style={{ background: 'transparent', color: 'inherit', borderColor: 'currentColor' }}
                     >
                       Example Button
@@ -469,19 +467,19 @@ export default function ColorPickerPage(){
           </div>
 
           {/* Palette Section */}
-          <div className="space-y-4">
+          <div className="grid gap-4">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">Color Palette</Label>
               <span className="text-xs text-muted-foreground">
-                Klik untuk copy, Alt+Klik untuk copy CSS variable
+                Click to copy, Alt+Click for CSS variable
               </span>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
               {paletteArr.map(p => (
-                <button 
-                  key={p.key} 
-                  onClick={(ev)=>onChipClick(p, ev)} 
-                  className="group rounded-xl border overflow-hidden text-left shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+                <button
+                  key={p.key}
+                  onClick={(ev)=>onChipClick(p, ev)}
+                  className="group rounded-xl border border-border/60 overflow-hidden text-left hover:shadow-md transition-all duration-200 hover:-translate-y-1"
                 >
                   <div className="h-20" style={{ background: p.hex }} />
                   <div className="flex items-center justify-between px-3 py-3 bg-background">
@@ -494,92 +492,92 @@ export default function ColorPickerPage(){
               ))}
             </div>
             <div className="flex gap-3 pt-2">
-              <Button size="sm" variant="secondary" onClick={()=>copy(cssVars)}>
+              <Button type="button" size="sm" variant="secondary" onClick={()=>copy(cssVars)}>
                 <Copy className="mr-2 h-4 w-4" /> Copy CSS Vars
               </Button>
-              <Button size="sm" variant="outline" onClick={()=>download('brand.css', cssVars)}>
+              <Button type="button" size="sm" variant="outline" onClick={()=>download('brand.css', cssVars)}>
                 <Download className="mr-2 h-4 w-4" /> Download CSS
               </Button>
-              <Button size="sm" variant="secondary" onClick={()=>copy(twLines)}>
+              <Button type="button" size="sm" variant="secondary" onClick={()=>copy(twLines)}>
                 <Copy className="mr-2 h-4 w-4" /> Copy Tailwind
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Gradient Builder Card */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Gradient Builder</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      {/* Gradient Builder Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Gradient Builder</span>
+        </div>
+        <div className="p-5 grid gap-5">
           <div className="grid lg:grid-cols-[280px_1fr] gap-8 items-center">
-            <div className="space-y-4">
+            <div className="grid gap-4">
               <div className="flex items-center gap-3">
-                <input 
-                  title='bg'
-                  type="color" 
-                  value={rgbToHex(alt)} 
-                  onChange={(e)=>setAltHexSafe(e.target.value)} 
-                  className="h-12 w-12 rounded-xl border-2 border-muted cursor-pointer" 
+                <input
+                  title='alt color'
+                  type="color"
+                  value={rgbToHex(alt)}
+                  onChange={(e)=>setAltHexSafe(e.target.value)}
+                  className="h-12 w-12 rounded-xl border-2 border-muted cursor-pointer"
                 />
-                <Input 
-                  value={altHex} 
-                  onChange={(e)=>setAltHexSafe(e.target.value)} 
-                  className="w-40 font-mono text-sm" 
+                <Input
+                  value={altHex}
+                  onChange={(e)=>setAltHexSafe(e.target.value)}
+                  className="w-40 font-mono text-sm bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
                   placeholder="#7AB0EA"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label className="text-sm font-medium">Angle: {angle}°</Label>
-                <input 
-                  title='bg'
-                  type="range" 
-                  min={0} 
-                  max={360} 
-                  value={angle} 
-                  onChange={(e)=>setAngle(Number(e.target.value))} 
+                <input
+                  title='angle'
+                  type="range"
+                  min={0}
+                  max={360}
+                  value={angle}
+                  onChange={(e)=>setAngle(Number(e.target.value))}
                   className="w-full h-2"
                 />
               </div>
             </div>
-            <div className="rounded-xl border h-40 shadow-inner" style={{ background: gradientCss }} />
+            <div className="rounded-xl border border-border/60 h-40" style={{ background: gradientCss }} />
           </div>
           <div className="flex gap-3">
-            <Input 
-              readOnly 
-              value={gradientCss} 
-              className="font-mono text-sm flex-1" 
+            <Input
+              readOnly
+              value={gradientCss}
+              className="font-mono text-sm flex-1 bg-muted/40 border-border/60 rounded-xl"
             />
-            <Button variant="secondary" onClick={()=>copy(gradientCss)}>
+            <Button type="button" variant="secondary" onClick={()=>copy(gradientCss)}>
               <Copy className="mr-2 h-4 w-4" /> Copy CSS
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Tokens Card */}
-      <Card className="shadow-sm">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-xl">Design Tokens</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-3">
+      {/* Design Tokens Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Design Tokens</span>
+        </div>
+        <div className="p-5 grid gap-5">
+          <div className="grid gap-2">
             <Label className="text-sm font-medium">CSS Variables</Label>
-            <ScrollArea className="h-48 rounded-lg border p-4 bg-muted/20">
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/60 bg-muted/40 p-4">
               <pre className="text-xs font-mono leading-relaxed">{cssVars}</pre>
-            </ScrollArea>
+            </div>
           </div>
-          <div className="space-y-3">
+          <div className="grid gap-2">
             <Label className="text-sm font-medium">Tailwind Configuration</Label>
-            <ScrollArea className="h-48 rounded-lg border p-4 bg-muted/20">
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-border/60 bg-muted/40 p-4">
               <pre className="text-xs font-mono leading-relaxed">{twLines}</pre>
-            </ScrollArea>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </div>
   )
 }
 

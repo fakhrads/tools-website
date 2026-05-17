@@ -1,14 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Textarea } from '@/components/ui/textarea'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Globe, Clock, Calendar, Plus, X, Copy, RefreshCcw } from 'lucide-react'
+import { Globe, Clock, Plus, X, Copy, RefreshCcw } from 'lucide-react'
 
 type TzItem = string
 
@@ -150,22 +146,32 @@ export default function TimezoneConverterPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <Globe className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">Date & Time Zone Converter</h1>
-        <Badge variant="outline">New</Badge>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <Globe className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Timezone Converter</h1>
+          <p className="text-sm text-muted-foreground">Convert date and time across any IANA timezone — live, no servers.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Source</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+      {/* Source Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Source</span>
+        </div>
+        <div className="p-4 grid gap-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="grid gap-1">
               <Label>Source Time Zone</Label>
-              <Input list="tz-list" value={sourceTZ} onChange={(e) => setSourceTZ(e.target.value)} />
+              <Input
+                list="tz-list"
+                value={sourceTZ}
+                onChange={(e) => setSourceTZ(e.target.value)}
+                className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+              />
               <datalist id="tz-list">
                 {COMMON_TZS.map(t => <option key={t} value={t} />)}
               </datalist>
@@ -174,7 +180,12 @@ export default function TimezoneConverterPage() {
             <div className="grid gap-1">
               <Label>Local Date-Time (di {sourceTZ || 'TZ'})</Label>
               <div className="flex gap-2">
-                <Input type="datetime-local" value={localYmdhm} onChange={(e) => setLocalYmdhm(e.target.value)} className="flex-1" />
+                <Input
+                  type="datetime-local"
+                  value={localYmdhm}
+                  onChange={(e) => setLocalYmdhm(e.target.value)}
+                  className="flex-1 rounded-xl bg-muted/40 border-border/60 focus-visible:ring-primary/50"
+                />
                 <Button type="button" variant="secondary" onClick={() => setLocalYmdhm(nowLocalStringForTZ(sourceTZ))}>
                   <RefreshCcw className="mr-2 h-4 w-4" /> Now
                 </Button>
@@ -182,58 +193,64 @@ export default function TimezoneConverterPage() {
               <p className="text-xs text-muted-foreground">Format: YYYY-MM-DDTHH:mm (24 jam)</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Targets</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
+      {/* Target Timezones Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Target Timezones</span>
+        </div>
+        <div className="p-4 grid gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {targets.map(tz => (
-              <span key={tz} className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-sm">
+              <span key={tz} className="inline-flex items-center gap-1.5 rounded-xl border border-border/60 bg-muted/40 px-3 py-1.5 text-sm">
                 <Clock className="h-3.5 w-3.5" /> {tz}
-                <button title="X" onClick={() => removeTarget(tz)} className="ml-1 text-muted-foreground hover:text-foreground">
+                <button title="Remove" onClick={() => removeTarget(tz)} className="ml-1 text-muted-foreground hover:text-foreground">
                   <X className="h-3.5 w-3.5" />
                 </button>
               </span>
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <Input list="tz-list" placeholder="Tambah time zone (IANA)" value={addTarget} onChange={(e) => setAddTarget(e.target.value)} />
+            <Input
+              list="tz-list"
+              placeholder="Add time zone (IANA)"
+              value={addTarget}
+              onChange={(e) => setAddTarget(e.target.value)}
+              className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+            />
             <Button type="button" onClick={addTargetTZ}><Plus className="mr-2 h-4 w-4" /> Add</Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Hasil Konversi</CardTitle>
-          <Button variant="outline" onClick={copyAll}><Copy className="mr-2 h-4 w-4" /> Copy JSON</Button>
-        </CardHeader>
-        <CardContent>
+      {/* Conversions Panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Conversions</span>
+          <div className="flex items-center gap-1.5">
+            <Button variant="outline" size="sm" onClick={copyAll}><Copy className="mr-2 h-4 w-4" /> Copy JSON</Button>
+          </div>
+        </div>
+        <div className="p-4">
           {!parsed ? (
             <p className="text-sm text-red-600">Input belum valid.</p>
           ) : results.length === 0 ? (
             <p className="text-sm text-muted-foreground">Tambahkan target time zone.</p>
           ) : (
-            <ScrollArea className="h-80 rounded border p-3">
-              <ul className="grid gap-3 text-sm">
-                {results.map(r => (
-                  <li key={r.tz} className="rounded border p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">{r.tz}</div>
-                      <Badge variant="outline">{r.iso}</Badge>
-                    </div>
-                    <div className="mt-1">{r.long}</div>
-                  </li>
-                ))}
-              </ul>
-            </ScrollArea>
+            <div className="grid gap-3 max-h-96 overflow-y-auto">
+              {results.map(r => (
+                <div key={r.tz} className="rounded-xl border border-border/60 bg-muted/30 p-4">
+                  <p className="font-medium text-sm">{r.tz}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{r.long}</p>
+                  <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded-md mt-1 inline-block">{r.iso}</code>
+                </div>
+              ))}
+            </div>
           )}
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -1,13 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Copy, Regex, Sparkles } from 'lucide-react'
 
@@ -40,7 +37,7 @@ function highlightMatches(text: string, re: RegExp | null) {
     const end = start + m[0].length
     if (start > lastIndex) chunks.push(<span key={`t-${lastIndex}`}>{text.slice(lastIndex, start)}</span>)
     chunks.push(
-      <mark key={`m-${start}-${end}`} className="rounded bg-yellow-200 px-1 py-0.5">
+      <mark key={`m-${start}-${end}`} className="rounded bg-primary/20 text-primary px-0.5 font-medium dark:bg-primary/30">
         {m[0]}
       </mark>
     )
@@ -130,53 +127,77 @@ export default function RegexTesterPage() {
   }
 
   return (
-    <section className="grid gap-6">
-      <div className="flex items-center gap-2">
-        <Regex className="h-5 w-5" />
-        <h1 className="text-xl font-semibold">Regex Tester & Explainer</h1>
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+          <Regex className="h-5 w-5" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">Regex Tester</h1>
+          <p className="text-sm text-muted-foreground">Test, match, and explain regular expressions in real-time.</p>
+        </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Pattern</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
+      {/* Pattern panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Pattern</span>
+        </div>
+        <div className="p-4 grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="pattern">Regex Pattern</Label>
-            <Input id="pattern" value={pattern} onChange={(e) => setPattern(e.target.value)} placeholder="mis. ^[a-z]+$" />
+            <Input
+              id="pattern"
+              value={pattern}
+              onChange={(e) => setPattern(e.target.value)}
+              placeholder="e.g. ^[a-z]+$"
+              className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="flags">Flags</Label>
-            <Input id="flags" value={flags} onChange={(e) => setFlags(e.target.value)} placeholder="mis. gimuy" />
+            <Input
+              id="flags"
+              value={flags}
+              onChange={(e) => setFlags(e.target.value)}
+              placeholder="e.g. gimuy"
+              className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+            />
             <div className="text-xs text-muted-foreground">g: global, i: ignore-case, m: multiline, s: dotAll, u: unicode, y: sticky</div>
           </div>
-          {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
-        </CardContent>
-      </Card>
+          {errorMsg && <p className="text-sm text-rose-600 dark:text-rose-400">{errorMsg}</p>}
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Test Text</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <Textarea rows={8} value={text} onChange={(e) => setText(e.target.value)} />
-          <Separator />
-          <div className="prose max-w-none rounded-md border p-3 text-sm">
+      {/* Test Text panel */}
+      <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+          <span className="text-sm font-medium">Test Text</span>
+        </div>
+        <div className="p-4 grid gap-3">
+          <Textarea
+            rows={8}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="bg-muted/40 border-border/60 focus-visible:ring-primary/50 rounded-xl"
+          />
+          <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-sm font-mono leading-relaxed min-h-[80px]">
             {highlightMatches(text, re)}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" /> Explainer
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        {/* Explainer panel */}
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <span className="text-sm font-medium flex items-center gap-2">
+              <Sparkles className="h-4 w-4" /> Explainer
+            </span>
+          </div>
+          <div className="p-4">
             {explanation.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Tidak ada penjelasan—mulai ketik pattern.</p>
+              <p className="text-sm text-muted-foreground">No explanation — start typing a pattern.</p>
             ) : (
               <ul className="list-disc pl-5 text-sm">
                 {explanation.map((n, i) => (
@@ -184,23 +205,26 @@ export default function RegexTesterPage() {
                 ))}
               </ul>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex items-center justify-between">
-            <CardTitle>Matches & Groups</CardTitle>
-            <Button size="sm" variant="secondary" onClick={copyMatches}>
-              <Copy className="mr-2 h-4 w-4" /> Copy JSON
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-64 rounded border p-3">
-              <pre className="text-xs">{JSON.stringify(matches, null, 2)}</pre>
+        {/* Matches & Groups panel */}
+        <div className="rounded-2xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-border/60 bg-muted/30">
+            <span className="text-sm font-medium">Matches</span>
+            <div className="flex items-center gap-1.5">
+              <Button size="sm" variant="secondary" onClick={copyMatches} className="h-7 px-2.5 text-xs">
+                <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy JSON
+              </Button>
+            </div>
+          </div>
+          <div className="p-4">
+            <ScrollArea className="h-52 rounded-xl border border-border/60 bg-muted/40 p-3">
+              <pre className="text-xs font-mono leading-relaxed">{JSON.stringify(matches, null, 2)}</pre>
             </ScrollArea>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   )
 }

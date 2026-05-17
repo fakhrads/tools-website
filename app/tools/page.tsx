@@ -2,281 +2,165 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Wand2,
-  FileJson,
-  Braces,
-  Star,
-  StarOff,
-  ExternalLink,
-  Info,
-  Regex,
-  Hash,
-  ShieldCheck,
-  Binary,
-  Clock,
-  Palette,
-} from 'lucide-react'
-
-type Tool = {
-  id: string
-  title: string
-  desc: string
-  href?: string
-  icon?: React.ReactNode
-  status?: 'New' | 'Beta' | 'Ready' | 'Soon'
-  category: 'Studio' | 'Utilities' | 'Converters'
-  tags?: string[]
-  version?: string
-  updatedAt?: string
-}
-
-const TOOLS: Tool[] = [
-  {
-    id: 'prettier',
-    title: 'Code Prettier',
-    desc: 'Format cepat dengan opsi semicolon, single quote, tab width.',
-    href: '/tools/prettier',
-    icon: <Wand2 className="h-4 w-4" />,
-    status: 'New',
-    category: 'Studio',
-    tags: ['format', 'code'],
-    version: '1.0',
-    updatedAt: '2025-11-06',
-  },
-  {
-    id: 'jsonlint',
-    title: 'JSON Lint',
-    desc: 'Validasi JSON + pretty print, error jelas.',
-    href: '/tools/json-lint',
-    icon: <FileJson className="h-4 w-4" />,
-    status: 'Ready',
-    category: 'Studio',
-    tags: ['json', 'lint'],
-    version: '1.2',
-    updatedAt: '2025-11-05',
-  },
-  {
-    id: 'regex',
-    title: 'Regex Tester',
-    desc: 'Uji regex dengan flags dan highlight match.',
-    href: '/tools/regex',
-    icon: <Regex className="h-4 w-4" />,
-    status: 'Ready',
-    category: 'Utilities',
-    tags: ['regex', 'test'],
-    version: '1.0',
-    updatedAt: '2025-11-06',
-  },
-  {
-    id: 'uuid',
-    title: 'UUID Generator',
-    desc: 'Generate UUID v4/v7, copy cepat, batch mode.',
-    href: '/tools/uuid',
-    icon: <Hash className="h-4 w-4" />,
-    status: 'Ready',
-    category: 'Utilities',
-    tags: ['uuid', 'id'],
-    version: '1.0',
-  },
-  {
-    id: 'jwt',
-    title: 'JWT Decoder',
-    desc: 'Decode header & payload (tanpa kirim ke server).',
-    href: '/tools/jwt',
-    icon: <ShieldCheck className="h-4 w-4" />,
-    status: 'Beta',
-    category: 'Utilities',
-    tags: ['jwt', 'auth'],
-    version: '0.9',
-  },
-  {
-    id: 'base64',
-    title: 'Base64 <→ Text',
-    desc: 'Encode/decode Base64, URL-safe, file to Base64.',
-    href: '/tools/base64',
-    icon: <Binary className="h-4 w-4" />,
-    status: 'Ready',
-    category: 'Converters',
-    tags: ['encode', 'decode'],
-    version: '1.0',
-  },
-  {
-    id: 'timestamp',
-    title: 'Timestamp Converter',
-    desc: 'Unix ↔ Date, zona waktu & format ISO.',
-    href: '/tools/timestamp',
-    icon: <Clock className="h-4 w-4" />,
-    status: 'Ready',
-    category: 'Converters',
-    tags: ['time', 'date'],
-    version: '1.0',
-  },
-  {
-    id: 'color',
-    title: 'Color Picker',
-    desc: 'HEX/RGB/HSL, konversi & clipboard cepat.',
-    href: '/tools/color',
-    icon: <Palette className="h-4 w-4" />,
-    status: 'Beta',
-    category: 'Utilities',
-    tags: ['color', 'design'],
-    version: '0.8',
-  },
-  {
-    id: 'csv2json',
-    title: 'CSV → JSON',
-    desc: 'Ubah CSV menjadi JSON dengan opsi header & delimiter.',
-    icon: <Braces className="h-4 w-4" />,
-    status: 'Soon',
-    category: 'Converters',
-    tags: ['csv', 'convert'],
-    version: '0.1',
-  },
-]
+import { Search, ArrowRight } from 'lucide-react'
+import { ITEMS, CATEGORY_ORDER, searchItems, groupByCategory, type Item } from '@/lib/tools.items'
 
 const cx = (...xs: Array<string | false | null | undefined>) => xs.filter(Boolean).join(' ')
-const relTime = (iso?: string) => {
-  if (!iso) return ''
-  const diff = Date.now() - new Date(iso).getTime()
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (d <= 0) return 'updated today'
-  if (d === 1) return 'updated 1 day ago'
-  if (d < 30) return `updated ${d} days ago`
-  const m = Math.floor(d / 30)
-  return `updated ${m} mo ago`
+
+const CATEGORY_META: Record<string, { color: string; bg: string; ring: string }> = {
+  Development: { color: 'text-indigo-500 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10', ring: 'ring-indigo-200 dark:ring-indigo-500/20' },
+  Data:        { color: 'text-emerald-500 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-500/10', ring: 'ring-emerald-200 dark:ring-emerald-500/20' },
+  Utilities:   { color: 'text-amber-500 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10', ring: 'ring-amber-200 dark:ring-amber-500/20' },
+  Network:     { color: 'text-sky-500 dark:text-sky-400', bg: 'bg-sky-50 dark:bg-sky-500/10', ring: 'ring-sky-200 dark:ring-sky-500/20' },
+  Security:    { color: 'text-rose-500 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-500/10', ring: 'ring-rose-200 dark:ring-rose-500/20' },
 }
 
+const TOOL_COUNT = ITEMS.filter(i => i.category !== 'Main').length
+
 export default function ToolsOverview() {
-  const [favs, setFavs] = React.useState<string[]>(
-    typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('tools_fav') || '[]') : []
-  )
+  const [q, setQ] = React.useState('')
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
   React.useEffect(() => {
-    try {
-      localStorage.setItem('tools_fav', JSON.stringify(favs))
-    } catch {}
-  }, [favs])
-  const toggleFav = (id: string) =>
-    setFavs((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id]))
+    const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName
+      if (!/INPUT|TEXTAREA|SELECT/.test(tag ?? '') && e.key === '/') {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  const searched = React.useMemo(
+    () => searchItems(q).filter(i => i.category !== 'Main'),
+    [q]
+  )
+  const grouped = React.useMemo(() => groupByCategory(searched), [searched])
+  const hasResults = CATEGORY_ORDER.some(c => c !== 'Main' && (grouped.get(c) ?? []).length > 0)
 
   return (
-    <div className="grid gap-6">
-      <h2 className="text-base font-semibold text-foreground">All tools</h2>
+    <div className="grid gap-8">
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold tracking-tight">All Tools</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {TOOL_COUNT} tools · runs entirely in your browser
+          </p>
+        </div>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 items-stretch">
-        {TOOLS.map((t) => (
-          <ToolCard key={t.id} tool={t} isFav={favs.includes(t.id)} onFav={toggleFav} />
-        ))}
+        {/* Search */}
+        <div className="relative sm:w-64">
+          <Input
+            ref={inputRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search…"
+            className="pl-9 pr-12 rounded-xl bg-muted/60 border-border/60 focus-visible:ring-primary/50"
+          />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-background px-1.5 font-mono text-[10px] text-muted-foreground select-none">
+            /
+          </kbd>
+        </div>
       </div>
+
+      {/* ── Category sections ── */}
+      {hasResults ? (
+        <div className="grid gap-10">
+          {CATEGORY_ORDER.filter(c => c !== 'Main').map(cat => {
+            const list = grouped.get(cat as Item['category']) ?? []
+            if (!list.length) return null
+            const meta = CATEGORY_META[cat] ?? CATEGORY_META.Development
+            return (
+              <section key={cat}>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className={cx('inline-flex items-center justify-center h-6 w-6 rounded-md ring-1', meta.bg, meta.ring)}>
+                    <span className={cx('h-2 w-2 rounded-full', meta.color.replace('text-', 'bg-'))} />
+                  </span>
+                  <h2 className="text-sm font-semibold text-foreground">{cat}</h2>
+                  <span className="text-xs text-muted-foreground">{list.length} tool{list.length !== 1 ? 's' : ''}</span>
+                  <div className="flex-1 h-px bg-border/60" />
+                </div>
+
+                <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {list.map(tool => (
+                    <ToolCard key={tool.href} tool={tool} meta={meta} />
+                  ))}
+                </div>
+              </section>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Search className="h-8 w-8 text-muted-foreground/40 mb-3" />
+          <p className="text-sm font-medium text-foreground">No tools found</p>
+          <p className="text-xs text-muted-foreground mt-1">Try a different keyword</p>
+        </div>
+      )}
     </div>
   )
 }
 
 function ToolCard({
   tool,
-  isFav,
-  onFav,
+  meta,
 }: {
-  tool: Tool
-  isFav: boolean
-  onFav: (id: string) => void
+  tool: Item
+  meta: { color: string; bg: string; ring: string }
 }) {
-  const disabled = !tool.href || tool.status === 'Soon'
-
   return (
-    <Card
-      className={cx(
-        'h-full flex flex-col rounded-2xl border border-border shadow-sm transition-all bg-card text-card-foreground',
-        !disabled && 'hover:shadow-md hover:-translate-y-0.5'
-      )}
+    <Link
+      href={tool.href}
+      className="group flex flex-col gap-4 rounded-2xl border border-border/60 bg-card p-5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 transition-all duration-150"
     >
-      <CardContent className="flex flex-col p-4">
-        <div className="flex flex-wrap items-center gap-2 justify-between">
-          <div className="flex items-center gap-2">
-            {tool.status && (
-              <Badge
-                variant={
-                  tool.status === 'New' ? 'secondary' : tool.status === 'Beta' ? 'outline' : 'secondary'
-                }
-                className={tool.status === 'Ready' ? 'bg-foreground text-background' : ''}
-              >
-                {tool.status}
-              </Badge>
-            )}
-            {tool.version && (
-              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground">
-                v{tool.version}
-              </span>
-            )}
-            {tool.updatedAt && (
-              <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
-                <Info className="h-3.5 w-3.5" /> {relTime(tool.updatedAt)}
-              </span>
-            )}
-          </div>
+      {/* Icon + category */}
+      <div className="flex items-center justify-between">
+        <span className={cx(
+          'inline-flex h-10 w-10 items-center justify-center rounded-xl ring-1 transition-colors',
+          meta.bg, meta.ring, meta.color,
+          'group-hover:ring-primary/30 group-hover:bg-accent group-hover:text-primary'
+        )}>
+          {tool.icon}
+        </span>
+        <Badge
+          variant="secondary"
+          className="text-[10px] font-medium rounded-full px-2 py-0.5 bg-muted/80 text-muted-foreground border-0"
+        >
+          {tool.category}
+        </Badge>
+      </div>
 
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-8 w-8 border-border"
-            onClick={() => onFav(tool.id)}
-            title={isFav ? 'Unpin' : 'Pin'}
-          >
-            {isFav ? <Star className="h-4 w-4 fill-yellow-400 text-yellow-500" /> : <StarOff className="h-4 w-4" />}
-          </Button>
+      {/* Label */}
+      <div className="flex-1">
+        <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+          {tool.label}
         </div>
 
-        <div className="mt-3 flex items-center gap-3 min-h-[48px]">
-          <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted ring-1 ring-border">
-            {tool.icon || <Braces className="h-4 w-4" />}
-          </span>
-          <div className="text-sm font-semibold leading-tight">{tool.title}</div>
-        </div>
-
-        <p className="mt-3 text-sm text-muted-foreground min-h-[56px]">{tool.desc}</p>
-
-        {tool.tags?.length ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {tool.tags.map((tg) => (
+        {tool.keywords?.length ? (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {tool.keywords.slice(0, 3).map(k => (
               <span
-                key={tg}
-                className="text-[11px] px-2 py-0.5 rounded-full bg-muted border border-border text-muted-foreground"
+                key={k}
+                className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground"
               >
-                {tg}
+                {k}
               </span>
             ))}
           </div>
         ) : null}
-      </CardContent>
+      </div>
 
-      <CardFooter className="mt-auto border-t border-border px-4 py-3">
-        <div className="w-full">
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">{tool.category}</div>
-
-            {disabled ? (
-              <Button size="sm" variant="secondary" disabled>
-                Open <ExternalLink className="ml-1 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button asChild size="sm" variant="secondary" className="group">
-                <Link href={tool.href!} aria-label={`Open ${tool.title}`}>
-                  Open <ExternalLink className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              </Button>
-            )}
-          </div>
-
-          <div className={cx('mt-2', disabled ? '' : 'opacity-0 pointer-events-none')}>
-            <div className="rounded-md bg-muted border border-border text-xs text-muted-foreground px-2 py-2">
-              Coming soon
-            </div>
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
+      {/* CTA */}
+      <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground group-hover:text-primary transition-colors mt-auto pt-1 border-t border-border/40">
+        Open tool
+        <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+      </div>
+    </Link>
   )
 }
