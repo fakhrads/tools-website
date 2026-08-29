@@ -7,6 +7,8 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from './theme-toggle'
+import { useAuth } from '@/lib/auth'
+import { LogIn, LogOut, User as UserIcon } from 'lucide-react'
 
 function cn(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(' ')
@@ -32,6 +34,7 @@ const NAV_LINKS: ReadonlyArray<NavLink> = [
 
 export function NavBar() {
   const pathname = usePathname()
+  const { authenticated, user, loading, login, logout } = useAuth()
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
@@ -91,14 +94,36 @@ export function NavBar() {
 
           {/* Actions */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60"
-              aria-label="Search"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
+            {/* Auth Button */}
+            {!loading && (
+              authenticated && user ? (
+                <div className="flex items-center gap-1.5 bg-muted/60 border border-border/60 pl-2.5 pr-1 py-1 rounded-xl text-xs">
+                  <span className="font-medium truncate max-w-[100px] text-foreground flex items-center gap-1">
+                    <UserIcon className="h-3 w-3 text-primary" />
+                    {user.username}
+                  </span>
+                  <Button
+                    onClick={logout}
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                    title="Logout"
+                  >
+                    <LogOut className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  onClick={login}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 text-xs font-medium rounded-xl border-border/70 hover:bg-primary hover:text-primary-foreground transition-all"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  <span>Login</span>
+                </Button>
+              )
+            )}
 
             <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted/60">
               <a
@@ -128,12 +153,30 @@ export function NavBar() {
           <span className="font-semibold text-sm tracking-tight">DevTools Studio</span>
         </Link>
 
-        <div className="flex items-center gap-1">
-          <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-            <a href="https://github.com/fakhrads/tools-website" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-              <GitHubIcon />
-            </a>
-          </Button>
+        <div className="flex items-center gap-1.5">
+          {!loading && (
+            authenticated && user ? (
+              <Button
+                onClick={logout}
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs text-muted-foreground hover:text-destructive"
+              >
+                <LogOut className="h-3.5 w-3.5 mr-1" />
+                <span>{user.username}</span>
+              </Button>
+            ) : (
+              <Button
+                onClick={login}
+                variant="outline"
+                size="sm"
+                className="h-8 px-2.5 text-xs rounded-lg"
+              >
+                <LogIn className="h-3.5 w-3.5 mr-1" />
+                <span>Login</span>
+              </Button>
+            )
+          )}
           <ModeToggle />
         </div>
       </div>
