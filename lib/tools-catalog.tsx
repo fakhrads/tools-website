@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {
   Wand2, FileJson, Regex, Type, FileSpreadsheet, Globe, KeyRound,
-  Timer, Clock, Fingerprint, Palette
+  Timer, Clock, Fingerprint, Palette, ShieldCheck, Binary, FileText, Database, Link2
 } from 'lucide-react'
 
 export type ToolItem = {
@@ -25,6 +25,11 @@ export const TOOLS: ToolItem[] = [
   { id: 'tz',           title: 'Time Zone Converter', href: '/tools/timezone',   category: 'Time',  icon: <Clock className="h-4 w-4" /> },
   { id: 'uid',          title: 'UID/ULID/Nanoid',   href: '/tools/uid',          category: 'ID',    icon: <Fingerprint className="h-4 w-4" /> },
   { id: 'color',        title: 'Color Picker',      href: '/tools/color-picker', category: 'Color', icon: <Palette className="h-4 w-4" /> },
+  { id: 'hash',         title: 'Hash Generator',    href: '/tools/hash-generator', category: 'Auth',  icon: <ShieldCheck className="h-4 w-4" /> },
+  { id: 'base64',       title: 'Base64 & URL Tool', href: '/tools/base64',         category: 'Data',  icon: <Binary className="h-4 w-4" /> },
+  { id: 'markdown',     title: 'Markdown Preview',  href: '/tools/markdown-preview', category: 'Text', icon: <FileText className="h-4 w-4" /> },
+  { id: 'sql-formatter', title: 'SQL Formatter',    href: '/tools/sql-formatter',  category: 'Code',  icon: <Database className="h-4 w-4" /> },
+  { id: 'url-parser',   title: 'URL Parser & Builder', href: '/tools/url-parser',   category: 'HTTP',  icon: <Link2 className="h-4 w-4" /> },
 ]
 
 export const CATEGORIES: string[] = Array.from(new Set(TOOLS.map(t => t.category))).sort()

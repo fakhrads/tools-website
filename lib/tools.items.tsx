@@ -14,6 +14,10 @@ import {
   ShieldCheck,
   Clock,
   FlaskConical,
+  Binary,
+  FileText,
+  Database,
+  Link2,
 } from 'lucide-react'
 
 export type Item = {
@@ -39,6 +43,11 @@ export const ITEMS: Item[] = [
   { href: '/tools/cron-builder', label: 'Cron Builder', icon: <Clock className="h-4 w-4" />, category: 'Development', keywords: ['schedule','jadwal','crontab'] },
 
   { href: '/tools/color', label: 'Color Picker', icon: <FlaskConical className="h-4 w-4" />, category: 'Development', keywords: ['color','picker'] },
+  { href: '/tools/hash-generator', label: 'Hash Generator', icon: <ShieldCheck className="h-4 w-4" />, category: 'Security', keywords: ['hash','sha256','md5','sha512','crypto'] },
+  { href: '/tools/base64', label: 'Base64 & URL Tool', icon: <Binary className="h-4 w-4" />, category: 'Utilities', keywords: ['base64','url','hex','encode','decode'] },
+  { href: '/tools/markdown-preview', label: 'Markdown Preview', icon: <FileText className="h-4 w-4" />, category: 'Development', keywords: ['markdown','preview','md','html'] },
+  { href: '/tools/sql-formatter', label: 'SQL Formatter', icon: <Database className="h-4 w-4" />, category: 'Development', keywords: ['sql','format','minify','query','beautify'] },
+  { href: '/tools/url-parser', label: 'URL Parser & Builder', icon: <Link2 className="h-4 w-4" />, category: 'Network', keywords: ['url','query','params','link','parser'] },
 
 ]
 
